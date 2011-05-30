@@ -30,27 +30,41 @@
 		delete_option ('wp_post_to_diaspora_diaspora_password');
 	}
 		
-	function wp_post_to_diaspora_process_tweet ($tweet) {
+	function wp_post_to_diaspora_process_content($content) {
 		$pattern = '/(?#Protocol)(?:(?:ht|f)tp(?:s?)\:\/\/|~\/|\/)?(?#Username:Password)(?:\w+:\w+@)?(?#Subdomains)(?:(?:[-\w]+\.)+(?#TopLevel Domains)(?:com|org|net|gov|mil|biz|info|mobi|name|aero|jobs|museum|travel|[a-z]{2}))(?#Port)(?::[\d]{1,5})?(?#Directories)(?:(?:(?:\/(?:[-\w~!$+|.,=]|%[a-f\d]{2})+)+|\/)+|\?|#)?(?#Query)(?:(?:\?(?:[-\w~!$+|.,*:]|%[a-f\d{2}])+=?(?:[-\w~!$+|.,*:=]|%[a-f\d]{2})*)(?:&(?:[-\w~!$+|.,*:]|%[a-f\d{2}])+=?(?:[-\w~!$+|.,*:=]|%[a-f\d]{2})*)*)*(?#Anchor)(?:#(?:[-\w~!$+|.,*:=]|%[a-f\d]{2})*)?/';
-		preg_match_all($pattern, $tweet, $matches);
-		foreach ($matches[0] as $match) {
-			$tweet = str_replace($match, wp_post_to_diaspora_shrink_url($match), $tweet);
+		preg_match_all($pattern, $content, $matches);
+
+		if ((isset($matches[0])) && (is_array($matches[0]))) {
+			foreach ($matches[0] as $match) {
+				$shortened_url = wp_post_to_diaspora_shrink_url($match);
+				if ($shortened_url !== false) {
+					$content = str_replace($match, wp_post_to_diaspora_shrink_url($match), $content);
+				}
+			}
 		}
-		return $tweet;
+
+		return $content;
 	}
 	
-	function wp_post_to_diaspora_process_tweet_to_string () {
-		echo wp_post_to_diaspora_process_tweet($_POST['tweet']); die();
+	function wp_post_to_diaspora_process_content_to_string () {
+		echo wp_post_to_diaspora_process_content($_POST['content']);
+
+		die();
 	}
 	
 	function wp_post_to_diaspora_shrink_url ($url) {
 		$target = 'http://tinyurl.com/api-create.php?url=';
 		$ch    = curl_init();
-		curl_setopt($ch, CURLOPT_URL, $target . $url);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
-		$url = curl_exec($ch);
-		curl_close($ch);
+		$url   = false;
+
+		if ($ch !== false) {
+			curl_setopt($ch, CURLOPT_URL, $target . $url);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+			curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
+			$url = curl_exec($ch);
+			curl_close($ch);
+		}
+
 		return $url;
 	}
 	
@@ -71,9 +85,18 @@
 			$pass = get_option ('wp_post_to_diaspora_diaspora_password');
 			$post = get_post ($postID);
 			$str = '%s - %s';
-			$tweet = sprintf ($str, $post->post_title, wp_post_to_diaspora_shrink_url(get_permalink ($postID)));
-			if (strlen ($user) > 0 && strlen ($pass) > 0) {
-				postTodiaspora ($user, $pass, $tweet);
+			$permalink = get_permalink($postID);
+
+			$shortened_url = wp_post_to_diaspora_shrink_url($permalink);
+			if ($shortened_url !== false) {
+				$content = sprintf($str, $post->post_title, $shortened_url);
+			}
+			else {
+				$content = sprintf($str, $post->post_title, $permalink);
+			}
+
+			if ((!empty($user))  && (!empty($pass))) {
+				postTodiaspora ($user, $pass, $content);
 			} else {
 				//Just chillax :)
 			}
@@ -84,5 +107,5 @@
 	register_deactivation_hook(__FILE__, 'wp_post_to_diaspora_remove');
 	add_action('admin_menu', 'wp_post_to_diaspora_add_admin_page');
 	add_action('publish_post', 'wp_post_to_diaspora_post_to_diaspora');
-	add_action('wp_ajax_js_shrink_urls', 'wp_post_to_diaspora_process_tweet_to_string');
+	add_action('wp_ajax_js_shrink_urls', 'wp_post_to_diaspora_process_content_to_string');
 ?>

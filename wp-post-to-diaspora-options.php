@@ -1,17 +1,19 @@
 <?php
-	if (isset ($_POST['tweet']) ) {
+	define('MAX_CONTENT_CHAR_LENGTH', 4096);
+
+	if (isset ($_POST['content']) ) {
 		if (strlen($user) > 0 && strlen($pass) > 0) {
-			$tweet = trim ($_POST['tweet']);
-			if (strlen ($tweet) > 0 && strlen ($tweet) < 140) {
+			$content = trim ($_POST['content']);
+			if (strlen($content) > 0 && strlen ($content) < MAX_CONTENT_CHAR_LENGTH) {
 				require_once dirname (__FILE__ . '/diaspora.php');
-				$twmessage = __(postTodiaspora ($user, $pass, wp_post_to_diaspora_process_tweet($tweet)));
-				if ($twmessage == 'Error posting to diaspora. Retry') {
-					echo '<div id="notice" class="error"><p>' . $twmessage . '</p></div>';
+				$diaspora_response = __(postTodiaspora ($user, $pass, wp_post_to_diaspora_process_content($content)));
+				if ($diaspora_response == 'Error posting to diaspora. Retry') {
+					echo '<div id="notice" class="error"><p>' . $diaspora_response . '</p></div>';
 				} else {
-					echo '<div id="notice" class="updated fade"><p>' . $twmessage . '</p></div>';
+					echo '<div id="notice" class="updated fade"><p>' . $diaspora_response . '</p></div>';
 				}
 			} else {
-				echo '<div id="notice" class="error"><p>' . __('Your tweet must be greater than 0 characters long and less than 140') . '</p></div>';
+				echo '<div id="notice" class="error"><p>' . __('Your post must be greater than 0 characters long and less than ' . MAX_CONTENT_CHAR_LENGTH) . '</p></div>';
 			}
 		} else {
 			echo '<div id="notice" class="error"><p>' . __('Please enter your diaspora username and password.') . '</p></div>';
@@ -54,7 +56,7 @@
             	<input type="hidden" name="page_options" value="wp_post_to_diaspora_diaspora_username,wp_post_to_diaspora_diaspora_password" />
                 <p class="submit"><input type="submit" name="update" value="<?=__('Save Changes');?>" /></p>
             </form>
-            <form id="tweet-form" method="post" action="?page=wp-post-to-diaspora%2Fwp-post-to-diaspora.php">
+            <form id="diaspora-form" method="post" action="?page=wp-post-to-diaspora%2Fwp-post-to-diaspora.php">
             	<table class="form-table">
             		<tr>
             			<th scope="row"></th>
@@ -64,46 +66,46 @@
 									<th scope="row">
 										<h3>What are you doing?</h3>
 									</th>
-									<td class="diaspora-word-limit">
-										<p>140</p>
+									<td class="diaspora-char-limit">
+										<p><?php echo MAX_CONTENT_CHAR_LENGTH; ?></p>
 									</td>
 								</tr>
 							</table>
 						</td>
 					</tr>
                    	<tr>
-                       	<th scope="row"><label for="tweet"><?=__('Message');?></label>  <a href="#" id="shrink"><?=__('Shrink URL\'s');?></a></th>
-                        <td><textarea name="tweet" id="tweet" cols="57" rows="5"></textarea></td>
+                       	<th scope="row"><label for="content"><?=__('Message');?></label>  <a href="#" id="shrink"><?=__('Shrink URL\'s');?></a></th>
+                        <td><textarea name="content" id="content" cols="57" rows="5"></textarea></td>
                     </tr>
                 </table>
-                <p class="submit"><input class="button-primary" type="submit" name="submit" value="<?=__('Tweet');?>" /></p>
+                <p class="submit"><input class="button-primary" type="submit" name="submit" value="<?=__('Post');?>" /></p>
             </form>
         </div>
 		<script type="text/javascript">
 			<!--//
 				(function($){
 					$(document).ready(function(){
-						var max_chars = 140;
-						$('#tweet').bind('keyup', function(e){
-							var tweet = $(this);
-							var total = tweet.val().length;
+						var max_chars = <?php echo MAX_CONTENT_CHAR_LENGTH ?>;
+						$('#content').bind('keyup', function(e){
+							var content = $(this);
+							var total = content.val().length;
 							var isnow = max_chars - total;
-							$('.diaspora-word-limit p').text(isnow);
+							$('.diaspora-char-limit p').text(isnow);
 							if (isnow <= 0) {
-								tweet.val(tweet.val().substr(0, max_chars - 1));
+								content.val(content.val().substr(0, max_chars - 1));
 							}
 						});
 						$('#shrink').bind('click', function(){
-							var tweet   = $('#tweet').val();
+							var content   = $('#content').val();
 							var re      = new RegExp(/(((ht|f)tp(s?))\:\/\/)?(www.|[a-zA-Z].)[a-zA-Z0-9\-\.]+\.(com|edu|gov|mil|net|org|biz|info|name|museum|us|ca|uk|ly)(\:[0-9]+)*(\/($|[a-zA-Z0-9\.\,\;\?\'\\\+&amp;%\$#\=~_\-]+))*/gi);
-							var matches = re.exec(tweet);
+							var matches = re.exec(content);
 							if (matches == null) return;
 							if (matches.length > 0) {
-								$('#tweet').attr('disabled', 'disabled');
-								var data = {'action':'js_shrink_urls','tweet':tweet};
+								$('#content').attr('disabled', 'disabled');
+								var data = {'action':'js_shrink_urls','content':content};
 								$.post(ajaxurl, data, function (response) {
-									$('#tweet').val(response);
-									$('#tweet').attr('disabled', '');
+									$('#content').val(response);
+									$('#content').attr('disabled', '');
 								});
 							}	
 						});

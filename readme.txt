@@ -9,8 +9,7 @@ Bad things that are true because I don't actually know PHP:
 gets rolled out.
 
 - since it was a hack job from a twitter plugin, I only replaced what
-  was absoultely nessisary to change, so some internal variables have
-names like "tweet".
+  was absolutely nessisary to change.
 
 
 
