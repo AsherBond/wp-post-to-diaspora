@@ -1,54 +1,52 @@
-=== Plugin Name ===
-Contributors: maxwell@joindiaspora.com 
-Tags: diaspora, post, tinyurl
-Requires at least: 2.7.0
-Tested up to: 3.1
-Stable tag: 1.0.0b
 
 beta Diapora plugin
 
-== Description ==
-
-This Wordpress Diaspora plugin is a nice simple plugin. All it does is post updates from your blog to your twitter account when you create a fresh post and allows you to tweet from you blog. Some other features are:
-<p style="text-align: center; color: #f00;">* This Plugin Requires CURL *</p>
-<ul>
-    <li>Auto shorten URL’s with tinyurl</li>
-    <li>Manually shorten URL’s with tinyurl from the user interface</li>
-    <li>Validation to make sure you can tweet or warns you if you cant</li>
-    <li>Automatic character limitation to make sure you don’t post anything over 140 characters</li>
-	<li>Good for SEO, creating automatic links to your blog and it’s posts</li>
-</ul>
+update Diaspora from your hosted Diaspora account
 
 
-based on:
+
+Bad things that are true because I don't actually know PHP:
+joindiaspora.com is hardcoded.
+
+- it still uses Diaspora's token auth.  We should switch to Ouath once it
+gets rolled out.
+
+- since it was a hack job from a twitter plugin, I only replaced what
+  was absoultely nessisary to change, so some internal variables have
+names like "tweet".
+
+
+
+*****WISH LIST****
+
+make the settings ask for Diaspora handle(not username), so the server it posts to is
+dynamic.  split on the server, and maybe you need an http or https
+option?
+
+give link shortener choices.
+
+allow for custom structure of post
+
+anything to make this a better plugin.  I am just hacking hacking
+hacking this away, so you know better than I do.
+
+
+
+Also, I'd love some info on better Wordpress Development workflow.  This
+was a pain to make!
+
+
+***things I will be fixing***
+the json structure that Diaspora accepts is rapidly changing.  I will be
+updating it ASAP.
+
+I am going to be using this as soon as possible from my blog
+
+http://blog.sourcedecay.net
+
+
+
+based completely on:
 http://www.skidoosh.co.uk/wordpress-plugins/wordpress-plugin-wp-post-to-twitter/
 
-== Installation ==
 
-Installation
-
-<p style="text-align: center; color: #f00;">* This Plugin Requires CURL *</p>
-
-All you have to do is download V1 from the link below, unzip it, upload it to your plugins folder and activate it from the plugins menu.
-
-== Screenshots ==
-
-1. A screenshot of the interface
-
-== Changelog ==
-
-= 1.0 =
-
-*Initial stable release
-
-= 1.1 = 
-
-Updated user docs
-
-= 1.5 =
-
-Added manual url shortening
-
-= 1.5.1 = 
-
-Added CURLOPT_CONNECTTIMEOUT and set to 30 seconds to avoid non update issue
