@@ -1,8 +1,10 @@
 <?php
+	define('MAX_CONTENT_CHAR_LENGTH', 4096);
+
 	if (isset ($_POST['content']) ) {
 		if (strlen($user) > 0 && strlen($pass) > 0) {
 			$content = trim ($_POST['content']);
-			if (strlen($content) > 0 && strlen ($content) < 140) {
+			if (strlen($content) > 0 && strlen ($content) < MAX_CONTENT_CHAR_LENGTH) {
 				require_once dirname (__FILE__ . '/diaspora.php');
 				$diaspora_response = __(postTodiaspora ($user, $pass, wp_post_to_diaspora_process_content($content)));
 				if ($diaspora_response == 'Error posting to diaspora. Retry') {
@@ -11,7 +13,7 @@
 					echo '<div id="notice" class="updated fade"><p>' . $diaspora_response . '</p></div>';
 				}
 			} else {
-				echo '<div id="notice" class="error"><p>' . __('Your post must be greater than 0 characters long and less than 140') . '</p></div>';
+				echo '<div id="notice" class="error"><p>' . __('Your post must be greater than 0 characters long and less than ' . MAX_CONTENT_CHAR_LENGTH) . '</p></div>';
 			}
 		} else {
 			echo '<div id="notice" class="error"><p>' . __('Please enter your diaspora username and password.') . '</p></div>';
@@ -64,8 +66,8 @@
 									<th scope="row">
 										<h3>What are you doing?</h3>
 									</th>
-									<td class="diaspora-word-limit">
-										<p>140</p>
+									<td class="diaspora-char-limit">
+										<p><?php echo MAX_CONTENT_CHAR_LENGTH; ?></p>
 									</td>
 								</tr>
 							</table>
@@ -83,12 +85,12 @@
 			<!--//
 				(function($){
 					$(document).ready(function(){
-						var max_chars = 140;
+						var max_chars = <?php echo MAX_CONTENT_CHAR_LENGTH ?>;
 						$('#content').bind('keyup', function(e){
 							var content = $(this);
 							var total = content.val().length;
 							var isnow = max_chars - total;
-							$('.diaspora-word-limit p').text(isnow);
+							$('.diaspora-char-limit p').text(isnow);
 							if (isnow <= 0) {
 								content.val(content.val().substr(0, max_chars - 1));
 							}
