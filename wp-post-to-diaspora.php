@@ -30,17 +30,17 @@
 		delete_option ('wp_post_to_diaspora_diaspora_password');
 	}
 		
-	function wp_post_to_diaspora_process_tweet ($tweet) {
+	function wp_post_to_diaspora_process_content($content) {
 		$pattern = '/(?#Protocol)(?:(?:ht|f)tp(?:s?)\:\/\/|~\/|\/)?(?#Username:Password)(?:\w+:\w+@)?(?#Subdomains)(?:(?:[-\w]+\.)+(?#TopLevel Domains)(?:com|org|net|gov|mil|biz|info|mobi|name|aero|jobs|museum|travel|[a-z]{2}))(?#Port)(?::[\d]{1,5})?(?#Directories)(?:(?:(?:\/(?:[-\w~!$+|.,=]|%[a-f\d]{2})+)+|\/)+|\?|#)?(?#Query)(?:(?:\?(?:[-\w~!$+|.,*:]|%[a-f\d{2}])+=?(?:[-\w~!$+|.,*:=]|%[a-f\d]{2})*)(?:&(?:[-\w~!$+|.,*:]|%[a-f\d{2}])+=?(?:[-\w~!$+|.,*:=]|%[a-f\d]{2})*)*)*(?#Anchor)(?:#(?:[-\w~!$+|.,*:=]|%[a-f\d]{2})*)?/';
-		preg_match_all($pattern, $tweet, $matches);
+		preg_match_all($pattern, $content, $matches);
 		foreach ($matches[0] as $match) {
-			$tweet = str_replace($match, wp_post_to_diaspora_shrink_url($match), $tweet);
+			$content = str_replace($match, wp_post_to_diaspora_shrink_url($match), $content);
 		}
-		return $tweet;
+		return $content;
 	}
 	
-	function wp_post_to_diaspora_process_tweet_to_string () {
-		echo wp_post_to_diaspora_process_tweet($_POST['tweet']); die();
+	function wp_post_to_diaspora_process_content_to_string () {
+		echo wp_post_to_diaspora_process_content($_POST['content']);
 	}
 	
 	function wp_post_to_diaspora_shrink_url ($url) {
@@ -71,9 +71,9 @@
 			$pass = get_option ('wp_post_to_diaspora_diaspora_password');
 			$post = get_post ($postID);
 			$str = '%s - %s';
-			$tweet = sprintf ($str, $post->post_title, wp_post_to_diaspora_shrink_url(get_permalink ($postID)));
+			$content = sprintf ($str, $post->post_title, wp_post_to_diaspora_shrink_url(get_permalink ($postID)));
 			if (strlen ($user) > 0 && strlen ($pass) > 0) {
-				postTodiaspora ($user, $pass, $tweet);
+				postTodiaspora ($user, $pass, $content);
 			} else {
 				//Just chillax :)
 			}
@@ -84,5 +84,5 @@
 	register_deactivation_hook(__FILE__, 'wp_post_to_diaspora_remove');
 	add_action('admin_menu', 'wp_post_to_diaspora_add_admin_page');
 	add_action('publish_post', 'wp_post_to_diaspora_post_to_diaspora');
-	add_action('wp_ajax_js_shrink_urls', 'wp_post_to_diaspora_process_tweet_to_string');
+	add_action('wp_ajax_js_shrink_urls', 'wp_post_to_diaspora_process_content_to_string');
 ?>
