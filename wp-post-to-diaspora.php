@@ -85,13 +85,17 @@
 			$pass = get_option ('wp_post_to_diaspora_diaspora_password');
 			$post = get_post ($postID);
 			$str = '%s - %s';
+			$permalink = get_permalink($postID);
 
-			$shortened_url = wp_post_to_diaspora_shrink_url(get_permalink($postID));
+			$shortened_url = wp_post_to_diaspora_shrink_url($permalink);
 			if ($shortened_url !== false) {
 				$content = sprintf($str, $post->post_title, $shortened_url);
 			}
+			else {
+				$content = sprintf($str, $post->post_title, $permalink);
+			}
 
-			if ((!empty($user))  && (!empty($pass)) && (content !== false)) {
+			if ((!empty($user))  && (!empty($pass))) {
 				postTodiaspora ($user, $pass, $content);
 			} else {
 				//Just chillax :)
