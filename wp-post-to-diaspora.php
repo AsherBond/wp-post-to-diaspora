@@ -4,22 +4,19 @@
 		 Info for WordPress:
 		 ==============================================================================
 		 Plugin Name: WP Post To diaspora
-		 Plugin URI: http://www.skidoosh.co.uk/wordpress-plugins/wordpress-plugin-wp-post-to-diaspora/
-		 Description: This Wordpress diaspora plugin is a nice simple plugin. All it does is post updates from your blog to your diaspora account when you create a fresh post and allows you to tweet from you blog. Some other features are:
-		<ul>
-    		<li>Auto shorten URL’s with tinyurl</li>
-    		<li>Validation to make sure you can tweet or warns you if you cant</li>
-    		<li>Automatic character limitation to make sure you don’t post anything over 140 characters</li>
-    		<li>Good for SEO, creating automatic links to your blog and it’s posts</li>
-    	</ul>
-
+     Plugin URI: http://github.com/maxwell/wp-post-to-diaspora
+     Description: beta plugin to post your new blog posts straight to your diaspora account 
 		Installation
 		
 		All you have to do is download V1 from the link below, unzip it, upload it to your plugins folder and activate it from the plugins menu.
 
-		 Version: 1.5.1
-		 Author: Glyn Mooney
-		 Author URI: http://www.skidoosh.com/
+    Version: 1.0.0a
+    Author: Maxwell Salzberg
+
+    Based on: http://www.skidoosh.co.uk/wordpress-plugins/wordpress-plugin-wp-post-to-twitter/
+
+		Original-Author: Glyn Mooney
+		Original-Author URI: http://www.skidoosh.com/
 	*/
 	require_once dirname (__FILE__) . '/diaspora.php';	
 	

@@ -1,17 +1,15 @@
 === Plugin Name ===
-Contributors: glyn3332@gmail.com
-Donate link: http://ww.skidoosh.com/
-Tags: twitter, tweet, auto-tweet, simple, SEO, seo, tinyurl
+Contributors: maxwell@joindiaspora.com 
+Tags: diaspora, post, tinyurl
 Requires at least: 2.7.0
-Tested up to: 2.9
-Stable tag: 1.5.1
+Tested up to: 3.1
+Stable tag: 1.0.0b
 
-This Wordpress Twitter plugin is a nice simple plugin. All it does is post updates from your blog to your twitter account when you create a fresh post and allows you to tweet from you blog. Some other features are:
-
+beta Diapora plugin
 
 == Description ==
 
-This Wordpress Twitter plugin is a nice simple plugin. All it does is post updates from your blog to your twitter account when you create a fresh post and allows you to tweet from you blog. Some other features are:
+This Wordpress Diaspora plugin is a nice simple plugin. All it does is post updates from your blog to your twitter account when you create a fresh post and allows you to tweet from you blog. Some other features are:
 <p style="text-align: center; color: #f00;">* This Plugin Requires CURL *</p>
 <ul>
     <li>Auto shorten URL’s with tinyurl</li>
@@ -20,6 +18,10 @@ This Wordpress Twitter plugin is a nice simple plugin. All it does is post updat
     <li>Automatic character limitation to make sure you don’t post anything over 140 characters</li>
 	<li>Good for SEO, creating automatic links to your blog and it’s posts</li>
 </ul>
+
+
+based on:
+http://www.skidoosh.co.uk/wordpress-plugins/wordpress-plugin-wp-post-to-twitter/
 
 == Installation ==
 
