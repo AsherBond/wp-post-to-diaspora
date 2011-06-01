@@ -2,11 +2,11 @@
 	define('MAX_CONTENT_CHAR_LENGTH', 4096);
 
 	if (isset ($_POST['content']) ) {
-		if (strlen($user) > 0 && strlen($pass) > 0) {
+		if (strlen($handle) > 0 && strlen($pass) > 0) {
 			$content = trim ($_POST['content']);
 			if (strlen($content) > 0 && strlen ($content) < MAX_CONTENT_CHAR_LENGTH) {
-				require_once dirname (__FILE__ . '/diaspora.php');
-				$diaspora_response = __(postTodiaspora ($user, $pass, wp_post_to_diaspora_process_content($content)));
+				require_once dirname (__FILE__) . '/diaspora.php';
+				$diaspora_response = __(postTodiaspora ($handle, $pass, wp_post_to_diaspora_process_content($content)));
 				if ($diaspora_response == 'Error posting to diaspora. Retry') {
 					echo '<div id="notice" class="error"><p>' . $diaspora_response . '</p></div>';
 				} else {
@@ -16,7 +16,7 @@
 				echo '<div id="notice" class="error"><p>' . __('Your post must be greater than 0 characters long and less than ' . MAX_CONTENT_CHAR_LENGTH) . '</p></div>';
 			}
 		} else {
-			echo '<div id="notice" class="error"><p>' . __('Please enter your diaspora username and password.') . '</p></div>';
+			echo '<div id="notice" class="error"><p>' . __('Please enter your diaspora handle and password.') . '</p></div>';
 		}
 	}
 ?>
@@ -44,8 +44,8 @@
         	<?php wp_nonce_field('update-options'); ?>
             <table id="diaspora-setting-form" class="form-table">
                 <tr>
-                    <th scope="row"><label for="diaspora_username"><?=__('Diaspora Username');?></label></th>
-                    <td><input type="text" class="regular-text" name="wp_post_to_diaspora_diaspora_username" id="diaspora_username" value="<?=$user;?>" /></td>
+                    <th scope="row"><label for="diaspora_handle"><?=__('Diaspora Handle');?></label></th>
+                    <td><input type="text" class="regular-text" name="wp_post_to_diaspora_diaspora_handle" id="diaspora_handle" value="<?php echo $handle; ?>" /></td>
                 </tr>
                 <tr>
                     <th scope="row"><label for="diaspora_password"><?=__('Diaspora Password');?></label></th>
@@ -53,7 +53,7 @@
                 </tr>
             </table>
             	<input type="hidden" name="action" value="update" />
-            	<input type="hidden" name="page_options" value="wp_post_to_diaspora_diaspora_username,wp_post_to_diaspora_diaspora_password" />
+            	<input type="hidden" name="page_options" value="wp_post_to_diaspora_diaspora_handle,wp_post_to_diaspora_diaspora_password" />
                 <p class="submit"><input type="submit" name="update" value="<?=__('Save Changes');?>" /></p>
             </form>
             <form id="diaspora-form" method="post" action="?page=wp-post-to-diaspora%2Fwp-post-to-diaspora.php">

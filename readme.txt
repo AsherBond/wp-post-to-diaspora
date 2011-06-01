@@ -3,21 +3,18 @@ Update Diaspora from your Wordpress!
 
 
 Bad things that are true because I don't actually know PHP:
-- joindiaspora.com is hardcoded.
 
 - it still uses Diaspora's token auth.  We should switch to OAuth once it
 gets rolled out.
 
 - since it was a hack job from a twitter plugin, I only replaced what
-  was absolutely nessisary to change.
+  was absolutely necessary to change.
 
 
 
 *****WISH LIST****
 
-make the settings ask for Diaspora handle(not username), so the server it posts to is
-dynamic.  split on the server, and maybe you need an http or https
-option?
+Need an http or https option for posting to Diaspora.
 
 give link shortener choices.
 
