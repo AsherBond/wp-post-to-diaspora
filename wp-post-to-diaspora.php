@@ -21,12 +21,12 @@
 	require_once dirname (__FILE__) . '/diaspora.php';	
 	
 	function wp_post_to_diaspora_install () {
-		add_option ('wp_post_to_diaspora_diaspora_username', '');
+		add_option ('wp_post_to_diaspora_diaspora_handle', '');
 		add_option ('wp_post_to_diaspora_diaspora_password', '');
 	}
 	
 	function wp_post_to_diaspora_remove () {
-		delete_option ('wp_post_to_diaspora_diaspora_username');
+		delete_option ('wp_post_to_diaspora_diaspora_handle');
 		delete_option ('wp_post_to_diaspora_diaspora_password');
 	}
 		
@@ -73,7 +73,7 @@
 	}
 	
 	function wp_post_to_diaspora_options () {
-		$user = get_option ('wp_post_to_diaspora_diaspora_username');
+		$handle = get_option ('wp_post_to_diaspora_diaspora_handle');
 		$pass = get_option ('wp_post_to_diaspora_diaspora_password');
 		require_once 'wp-post-to-diaspora-options.php';
 	}
@@ -81,7 +81,7 @@
 	function wp_post_to_diaspora_post_to_diaspora ($postID) {
 		if (!wp_is_post_revision($postID)) {
 			require_once dirname(__FILE__) . '/diaspora.php';
-			$user = get_option ('wp_post_to_diaspora_diaspora_username');
+			$handle = get_option ('wp_post_to_diaspora_diaspora_handle');
 			$pass = get_option ('wp_post_to_diaspora_diaspora_password');
 			$post = get_post ($postID);
 			$str = '%s - %s';
@@ -95,8 +95,8 @@
 				$content = sprintf($str, $post->post_title, $permalink);
 			}
 
-			if ((!empty($user))  && (!empty($pass))) {
-				postTodiaspora ($user, $pass, $content);
+			if ((!empty($handle))  && (!empty($pass))) {
+				postTodiaspora ($handle, $pass, $content);
 			} else {
 				//Just chillax :)
 			}

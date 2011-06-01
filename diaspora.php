@@ -1,10 +1,23 @@
 <?php
 
-	function postTodiaspora($username, $password, $message) {
+	function postTodiaspora($handle, $password, $message) {
 		$processed_message = $message;
+		$handle_array = explode('@', $handle, 2);
+		$username = '';
+		$server_domain = '';
+
+		if (count($handle_array) == 2) {	
+			$username = $handle_array[0];
+			$server_domain = $handle_array[1];
+		}
+
+		if ((empty($username)) || (empty($server_domain))) {
+			$diaspora_status = 'Error posting to Diaspora.  Please use your full Diaspora Handle in the form of username@server_name.com';
+		}
+
 		$json_array = array('auth_token' => $password, 'text' => $processed_message, 'format' => 'json');
 		$json_string = json_encode($json_array);
-	    $host = "https://pivots.joindiaspora.com/activity_streams/notes.json";
+		$host = 'https://' . $server_domain . '/activity_streams/notes.json';
 		$resultArray = null;
 		$diaspora_status = '';
 		$ch = curl_init();
