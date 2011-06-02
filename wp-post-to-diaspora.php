@@ -21,15 +21,67 @@
 	require_once dirname (__FILE__) . '/diaspora.php';	
 	
 	function wp_post_to_diaspora_install () {
-		add_option ('wp_post_to_diaspora_diaspora_handle', '');
-		add_option ('wp_post_to_diaspora_diaspora_password', '');
+		add_option ('wp_post_to_diaspora_options', '');
 	}
 	
 	function wp_post_to_diaspora_remove () {
-		delete_option ('wp_post_to_diaspora_diaspora_handle');
-		delete_option ('wp_post_to_diaspora_diaspora_password');
+		delete_option ('wp_post_to_diaspora_options');
 	}
-		
+
+	function wp_post_to_diaspora_admin_init() {
+		register_setting( 'diaspora_options', 'wp_post_to_diaspora_options', 'diaspora_options_validate' );
+
+		add_settings_section( 'diaspora_general', 'General', 'plugin_section_text', 'general' );
+
+		$field_args_by_id = array();
+
+		$field_args_by_id['handle'] = array(
+			'class'		=> 'regular-text',
+			'label'		=> 'Diaspora Handle',
+			'name'		=> 'handle',
+			'type'		=> 'text'
+		);
+
+		$field_args_by_id['pass'] = array(
+			'class'		=> 'regular-text',
+			'label'		=> 'Diaspora Password',
+			'name'		=> 'password',
+			'type'		=> 'password'
+		);
+
+		foreach ( $field_args_by_id as $id => $field_args ) {
+			$field_args['id'] = $id;
+
+			add_settings_field( $id, $field_args['label'], 'plugin_setting_input', 'general', 'diaspora_general', $field_args );
+		}
+
+	}
+
+	function plugin_setting_input( $args = array() ) {
+		$options = get_option( 'wp_post_to_diaspora_options' );
+		$type = $options[$args['type']];
+		$value = $options[$args['name']];
+
+		switch ( $args['type'] ) {
+			case 'text':
+			case 'password':
+				echo "<input id='{$args['id']}' class='{$args['class']}' name='wp_post_to_diaspora_options[{$args['name']}]' type='{$args['type']}' value='$value' />";
+				break;
+			default:
+
+				break;
+
+		}
+	}
+
+	function diaspora_options_validate( $input ) {
+		return $input;
+	}
+
+	function plugin_section_text() {
+		echo '<p>Enter your Diaspora connection information below.</p>';
+	}
+
 	function wp_post_to_diaspora_process_content($content) {
 		$pattern = '/(?#Protocol)(?:(?:ht|f)tp(?:s?)\:\/\/|~\/|\/)?(?#Username:Password)(?:\w+:\w+@)?(?#Subdomains)(?:(?:[-\w]+\.)+(?#TopLevel Domains)(?:com|org|net|gov|mil|biz|info|mobi|name|aero|jobs|museum|travel|[a-z]{2}))(?#Port)(?::[\d]{1,5})?(?#Directories)(?:(?:(?:\/(?:[-\w~!$+|.,=]|%[a-f\d]{2})+)+|\/)+|\?|#)?(?#Query)(?:(?:\?(?:[-\w~!$+|.,*:]|%[a-f\d{2}])+=?(?:[-\w~!$+|.,*:=]|%[a-f\d]{2})*)(?:&(?:[-\w~!$+|.,*:]|%[a-f\d{2}])+=?(?:[-\w~!$+|.,*:=]|%[a-f\d]{2})*)*)*(?#Anchor)(?:#(?:[-\w~!$+|.,*:=]|%[a-f\d]{2})*)?/';
 		preg_match_all($pattern, $content, $matches);
@@ -73,16 +125,20 @@
 	}
 	
 	function wp_post_to_diaspora_options () {
-		$handle = get_option ('wp_post_to_diaspora_diaspora_handle');
-		$pass = get_option ('wp_post_to_diaspora_diaspora_password');
+		$options = get_option ( 'diaspora_options' );
+
+		$handle = $options['wp_post_to_diaspora_diaspora_handle'];
+		$pass = $option['wp_post_to_diaspora_diaspora_password'];
 		require_once 'wp-post-to-diaspora-options.php';
 	}
 	
 	function wp_post_to_diaspora_post_to_diaspora ($postID) {
 		if (!wp_is_post_revision($postID)) {
 			require_once dirname(__FILE__) . '/diaspora.php';
-			$handle = get_option ('wp_post_to_diaspora_diaspora_handle');
-			$pass = get_option ('wp_post_to_diaspora_diaspora_password');
+			$options = get_option ( 'diaspora_options' );
+
+			$handle = $options['wp_post_to_diaspora_diaspora_handle'];
+			$pass = $option['wp_post_to_diaspora_diaspora_password'];
 			$post = get_post ($postID);
 			$str = '%s - %s';
 			$permalink = get_permalink($postID);
@@ -106,6 +162,7 @@
 	register_activation_hook(__FILE__, 'wp_post_to_diaspora_install');
 	register_deactivation_hook(__FILE__, 'wp_post_to_diaspora_remove');
 	add_action('admin_menu', 'wp_post_to_diaspora_add_admin_page');
+	add_action( 'admin_init', 'wp_post_to_diaspora_admin_init' );
 	add_action('publish_post', 'wp_post_to_diaspora_post_to_diaspora');
 	add_action('wp_ajax_js_shrink_urls', 'wp_post_to_diaspora_process_content_to_string');
 ?>

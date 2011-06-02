@@ -41,19 +41,10 @@
    	<div class="wrap">
 	    <h2>WP Post To diaspora</h2>
 		<form method="post" action="options.php">
-        	<?php wp_nonce_field('update-options'); ?>
-            <table id="diaspora-setting-form" class="form-table">
-                <tr>
-                    <th scope="row"><label for="diaspora_handle"><?=__('Diaspora Handle');?></label></th>
-                    <td><input type="text" class="regular-text" name="wp_post_to_diaspora_diaspora_handle" id="diaspora_handle" value="<?php echo $handle; ?>" /></td>
-                </tr>
-                <tr>
-                    <th scope="row"><label for="diaspora_password"><?=__('Diaspora Password');?></label></th>
-                    <td><input type="password" class="regular-text" name="wp_post_to_diaspora_diaspora_password" id="diaspora_password" value="<?=$pass;?>" /></td>
-                </tr>
-            </table>
-            	<input type="hidden" name="action" value="update" />
-            	<input type="hidden" name="page_options" value="wp_post_to_diaspora_diaspora_handle,wp_post_to_diaspora_diaspora_password" />
+<?php
+			settings_fields( 'diaspora_options' );
+			do_settings_sections( 'general' );
+?>
                 <p class="submit"><input type="submit" name="update" value="<?=__('Save Changes');?>" /></p>
             </form>
             <form id="diaspora-form" method="post" action="?page=wp-post-to-diaspora%2Fwp-post-to-diaspora.php">
