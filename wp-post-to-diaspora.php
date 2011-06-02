@@ -18,7 +18,7 @@
 		Original-Author: Glyn Mooney
 		Original-Author URI: http://www.skidoosh.com/
 	*/
-	require_once dirname (__FILE__) . '/diaspora.php';	
+	require_once dirname (__FILE__) . '/Diaspora.php';	
 	
 	function wp_post_to_diaspora_install () {
 		add_option ('wp_post_to_diaspora_options', '');
@@ -29,7 +29,7 @@
 	}
 
 	function wp_post_to_diaspora_admin_init() {
-		register_setting( 'diaspora_options', 'wp_post_to_diaspora_options', 'diaspora_options_validate' );
+		register_setting( 'wp_post_to_diaspora_options', 'wp_post_to_diaspora_options', 'diaspora_options_validate' );
 
 		add_settings_section( 'diaspora_general', 'General', 'plugin_section_text', 'general' );
 
@@ -125,20 +125,21 @@
 	}
 	
 	function wp_post_to_diaspora_options () {
-		$options = get_option ( 'diaspora_options' );
+		$options = get_option( 'wp_post_to_diaspora_options' );
 
-		$handle = $options['wp_post_to_diaspora_diaspora_handle'];
-		$pass = $option['wp_post_to_diaspora_diaspora_password'];
+		$handle = $options['handle'];
+		$pass = $options['password'];
+
 		require_once 'wp-post-to-diaspora-options.php';
 	}
 	
 	function wp_post_to_diaspora_post_to_diaspora ($postID) {
 		if (!wp_is_post_revision($postID)) {
 			require_once dirname(__FILE__) . '/diaspora.php';
-			$options = get_option ( 'diaspora_options' );
+			$options = get_option ( 'wp_post_to_diaspora_options' );
 
-			$handle = $options['wp_post_to_diaspora_diaspora_handle'];
-			$pass = $option['wp_post_to_diaspora_diaspora_password'];
+			$handle = $options['handle'];
+			$pass = $options['password'];
 			$post = get_post ($postID);
 			$str = '%s - %s';
 			$permalink = get_permalink($postID);
@@ -152,7 +153,13 @@
 			}
 
 			if ((!empty($handle))  && (!empty($pass))) {
-				postTodiaspora ($handle, $pass, $content);
+				$diaspora = new Diaspora();
+
+				$diaspora->setHandle( $handle );
+				$diaspora->setPassword( $pass );
+				$diaspora->setMessage( $content );
+
+				$diaspora->postTodiaspora();
 			} else {
 				//Just chillax :)
 			}
@@ -161,8 +168,8 @@
 	
 	register_activation_hook(__FILE__, 'wp_post_to_diaspora_install');
 	register_deactivation_hook(__FILE__, 'wp_post_to_diaspora_remove');
-	add_action('admin_menu', 'wp_post_to_diaspora_add_admin_page');
 	add_action( 'admin_init', 'wp_post_to_diaspora_admin_init' );
+	add_action('admin_menu', 'wp_post_to_diaspora_add_admin_page');
 	add_action('publish_post', 'wp_post_to_diaspora_post_to_diaspora');
 	add_action('wp_ajax_js_shrink_urls', 'wp_post_to_diaspora_process_content_to_string');
 ?>

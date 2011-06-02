@@ -5,8 +5,17 @@
 		if (strlen($handle) > 0 && strlen($pass) > 0) {
 			$content = trim ($_POST['content']);
 			if (strlen($content) > 0 && strlen ($content) < MAX_CONTENT_CHAR_LENGTH) {
-				require_once dirname (__FILE__) . '/diaspora.php';
-				$diaspora_response = __(postTodiaspora ($handle, $pass, wp_post_to_diaspora_process_content($content)));
+
+				require_once dirname (__FILE__) . '/Diaspora.php';
+
+				$diaspora = new Diaspora();
+
+				$diaspora->setHandle( $handle );
+				$diaspora->setPassword( $pass );
+				$diaspora->setMessage( wp_post_to_diaspora_process_content( $content ) );
+
+				$diaspora_response = __( $diaspora->postToDiaspora() );
+
 				if ($diaspora_response == 'Error posting to diaspora. Retry') {
 					echo '<div id="notice" class="error"><p>' . $diaspora_response . '</p></div>';
 				} else {
@@ -42,11 +51,11 @@
 	    <h2>WP Post To diaspora</h2>
 		<form method="post" action="options.php">
 <?php
-			settings_fields( 'diaspora_options' );
+			settings_fields( 'wp_post_to_diaspora_options' );
 			do_settings_sections( 'general' );
 ?>
-                <p class="submit"><input type="submit" name="update" value="<?=__('Save Changes');?>" /></p>
-            </form>
+                	<p class="submit"><input type="submit" name="update" value="<?=__('Save Changes');?>" /></p>
+		</form>
             <form id="diaspora-form" method="post" action="?page=wp-post-to-diaspora%2Fwp-post-to-diaspora.php">
             	<table class="form-table">
             		<tr>
