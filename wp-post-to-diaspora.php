@@ -121,7 +121,7 @@
 	}
 	
 	function wp_post_to_diaspora_add_admin_page () {
-		add_options_page ('Post To diaspora', 'Post To diaspora', 8, __FILE__, 'wp_post_to_diaspora_options');
+		add_options_page ('Post To diaspora', 'Post To diaspora', 'manage_options', 'wp-post-to-diaspora', 'wp_post_to_diaspora_options');
 	}
 	
 	function wp_post_to_diaspora_options () {

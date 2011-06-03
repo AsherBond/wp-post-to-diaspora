@@ -56,7 +56,7 @@
 ?>
                 	<p class="submit"><input type="submit" name="update" value="<?=__('Save Changes');?>" /></p>
 		</form>
-            <form id="diaspora-form" method="post" action="?page=wp-post-to-diaspora%2Fwp-post-to-diaspora.php">
+            <form id="diaspora-form" method="post" action="?page=wp-post-to-diaspora.php">
             	<table class="form-table">
             		<tr>
             			<th scope="row"></th>
