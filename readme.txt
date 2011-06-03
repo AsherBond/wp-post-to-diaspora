@@ -14,11 +14,11 @@ gets rolled out.
 
 *****WISH LIST****
 
-Need an http or https option for posting to Diaspora.
+Do not store the Diaspora password as plain-text.
 
-give link shortener choices.
+Give link shortener choices.
 
-allow for custom structure of post.
+Allow for custom structure of post.
 
 Anything to make this a better plugin.  I am just hacking hacking
 hacking this away, so if you know anything about Wordpress plugins, you know better than I do.

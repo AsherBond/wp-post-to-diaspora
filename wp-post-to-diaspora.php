@@ -18,18 +18,124 @@
 		Original-Author: Glyn Mooney
 		Original-Author URI: http://www.skidoosh.com/
 	*/
-	require_once dirname (__FILE__) . '/diaspora.php';	
+	require_once dirname (__FILE__) . '/Diaspora.php';	
 	
 	function wp_post_to_diaspora_install () {
-		add_option ('wp_post_to_diaspora_diaspora_handle', '');
-		add_option ('wp_post_to_diaspora_diaspora_password', '');
+		add_option ('wp_post_to_diaspora_options', '');
 	}
 	
 	function wp_post_to_diaspora_remove () {
-		delete_option ('wp_post_to_diaspora_diaspora_handle');
-		delete_option ('wp_post_to_diaspora_diaspora_password');
+		delete_option ('wp_post_to_diaspora_options');
 	}
+
+	function wp_post_to_diaspora_admin_init() {
+		register_setting( 'wp_post_to_diaspora_options', 'wp_post_to_diaspora_options', 'diaspora_options_validate' );
+
+		add_settings_section( 'diaspora_general', 'General', 'plugin_section_text', 'general' );
+
+		$default_field_args = array(
+			'class'		=> 'regular-text',
+			'default_value'	=> '',
+			'label'		=> '',
+			'name'		=> '',
+			'type'		=> 'text',
+			'options'	=> '',
+		);
+
+		$field_args_by_id = array();
+
+		$field_args_by_id['handle'] = array(
+			'label'		=> 'Diaspora Handle',
+			'name'		=> 'handle',
+			'type'		=> 'text'
+		);
+
+		$field_args_by_id['pass'] = array(
+			'label'		=> 'Diaspora Password',
+			'name'		=> 'password',
+			'type'		=> 'password'
+		);
+
+		$field_args_by_id['protocol'] = array(
+			'default_value'	=> Diaspora::HTTPS,
+			'label'		=> 'Connection Type',
+			'name'		=> 'protocol',
+			'type'		=> 'checkbox',
+			'options'	=> array (
+						array( 'label'	=> 'Encrypted',
+						       'value'	=> Diaspora::HTTPS ),
+			)
+		);
+
+		foreach ( $field_args_by_id as $id => $field_args ) {
+			$field_args = wp_parse_args( $field_args, $default_field_args );
+
+			$field_args['id'] = $id;
+
+			add_settings_field( $id, $field_args['label'], 'plugin_setting_input', 'general', 'diaspora_general', $field_args );
+		}
+
+	}
+
+	function plugin_setting_input( $args = array() ) {
+		$default_value = $args['default_value'];
+		$options = get_option( 'wp_post_to_diaspora_options' );
 		
+		$value = $options[$args['name']];
+
+		if ( empty( $value ) ) {
+			$value = $default_value;
+		}
+
+		switch ( $args['type'] ) {
+			case 'text':
+			case 'password':
+				echo "<input id='{$args['id']}' class='{$args['class']}' name='wp_post_to_diaspora_options[{$args['name']}]' type='{$args['type']}' value='$value' />";
+				break;
+			case 'checkbox':
+				foreach ($args['options'] as $option) {
+					$checked = '';
+
+					if ( is_array( $value ) ) {
+						if ( in_array($option['value'], $value ) ) {
+							$checked = "checked='checked'";
+						}
+					}
+					else if ( $option['value'] == $value ) {
+						$checked = "checked='checked'";
+					}
+
+					echo "<input id='{$args['id']}' class='{$args['class']}' name='wp_post_to_diaspora_options[{$args['name']}][]' type='{$args['type']}' value='{$option['value']}' $checked /> {$option['label']}";
+				}
+			default:
+			
+				break;
+
+		}
+	}
+
+	function diaspora_options_validate( $inputs ) {
+		foreach ( $inputs as $name => $value ) {
+			if ( is_array ( $value ) && ( count( $value ) === 1 ) && ( isset( $value[0] ) ) ) {
+				$inputs[$name] = $value[0];
+			}
+
+			if ( !is_array( $value ) ) {
+				$inputs[$name] = trim( $value );
+			}
+		}
+
+		if ( !isset($inputs['protocol'] ) ) {
+			$inputs['protocol'] = Diaspora::HTTP;
+		}
+
+		return $inputs;
+	}
+
+	function plugin_section_text() {
+		echo '<p>Enter your Diaspora connection information below.</p>';
+	}
+
 	function wp_post_to_diaspora_process_content($content) {
 		$pattern = '/(?#Protocol)(?:(?:ht|f)tp(?:s?)\:\/\/|~\/|\/)?(?#Username:Password)(?:\w+:\w+@)?(?#Subdomains)(?:(?:[-\w]+\.)+(?#TopLevel Domains)(?:com|org|net|gov|mil|biz|info|mobi|name|aero|jobs|museum|travel|[a-z]{2}))(?#Port)(?::[\d]{1,5})?(?#Directories)(?:(?:(?:\/(?:[-\w~!$+|.,=]|%[a-f\d]{2})+)+|\/)+|\?|#)?(?#Query)(?:(?:\?(?:[-\w~!$+|.,*:]|%[a-f\d{2}])+=?(?:[-\w~!$+|.,*:=]|%[a-f\d]{2})*)(?:&(?:[-\w~!$+|.,*:]|%[a-f\d{2}])+=?(?:[-\w~!$+|.,*:=]|%[a-f\d]{2})*)*)*(?#Anchor)(?:#(?:[-\w~!$+|.,*:=]|%[a-f\d]{2})*)?/';
 		preg_match_all($pattern, $content, $matches);
@@ -69,20 +175,27 @@
 	}
 	
 	function wp_post_to_diaspora_add_admin_page () {
-		add_options_page ('Post To diaspora', 'Post To diaspora', 8, __FILE__, 'wp_post_to_diaspora_options');
+		add_options_page ('Post To diaspora', 'Post To diaspora', 'manage_options', 'wp-post-to-diaspora', 'wp_post_to_diaspora_options');
 	}
 	
 	function wp_post_to_diaspora_options () {
-		$handle = get_option ('wp_post_to_diaspora_diaspora_handle');
-		$pass = get_option ('wp_post_to_diaspora_diaspora_password');
+		$options = get_option( 'wp_post_to_diaspora_options' );
+
+		$handle = $options['handle'];
+		$pass = $options['password'];
+		$protocol = $options['protocol'];
+
 		require_once 'wp-post-to-diaspora-options.php';
 	}
 	
 	function wp_post_to_diaspora_post_to_diaspora ($postID) {
 		if (!wp_is_post_revision($postID)) {
 			require_once dirname(__FILE__) . '/diaspora.php';
-			$handle = get_option ('wp_post_to_diaspora_diaspora_handle');
-			$pass = get_option ('wp_post_to_diaspora_diaspora_password');
+			$options = get_option ( 'wp_post_to_diaspora_options' );
+
+			$handle = $options['handle'];
+			$pass = $options['password'];
+			$protocol = $options['protocol'];
 			$post = get_post ($postID);
 			$str = '%s - %s';
 			$permalink = get_permalink($postID);
@@ -96,7 +209,14 @@
 			}
 
 			if ((!empty($handle))  && (!empty($pass))) {
-				postTodiaspora ($handle, $pass, $content);
+				$diaspora = new Diaspora();
+
+				$diaspora->setHandle( $handle );
+				$diaspora->setPassword( $pass );
+				$diaspora->setMessage( $content );
+				$diaspora->setProtocol( $protocol );
+
+				$diaspora->postToDiaspora();
 			} else {
 				//Just chillax :)
 			}
@@ -105,6 +225,7 @@
 	
 	register_activation_hook(__FILE__, 'wp_post_to_diaspora_install');
 	register_deactivation_hook(__FILE__, 'wp_post_to_diaspora_remove');
+	add_action( 'admin_init', 'wp_post_to_diaspora_admin_init' );
 	add_action('admin_menu', 'wp_post_to_diaspora_add_admin_page');
 	add_action('publish_post', 'wp_post_to_diaspora_post_to_diaspora');
 	add_action('wp_ajax_js_shrink_urls', 'wp_post_to_diaspora_process_content_to_string');

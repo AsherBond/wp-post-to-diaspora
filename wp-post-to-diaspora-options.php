@@ -5,8 +5,18 @@
 		if (strlen($handle) > 0 && strlen($pass) > 0) {
 			$content = trim ($_POST['content']);
 			if (strlen($content) > 0 && strlen ($content) < MAX_CONTENT_CHAR_LENGTH) {
-				require_once dirname (__FILE__) . '/diaspora.php';
-				$diaspora_response = __(postTodiaspora ($handle, $pass, wp_post_to_diaspora_process_content($content)));
+
+				require_once dirname (__FILE__) . '/Diaspora.php';
+
+				$diaspora = new Diaspora();
+
+				$diaspora->setHandle( $handle );
+				$diaspora->setPassword( $pass );
+				$diaspora->setMessage( wp_post_to_diaspora_process_content( $content ) );
+				$diaspora->setProtocol( $protocol );
+
+				$diaspora_response = __( $diaspora->postToDiaspora() );
+
 				if ($diaspora_response == 'Error posting to diaspora. Retry') {
 					echo '<div id="notice" class="error"><p>' . $diaspora_response . '</p></div>';
 				} else {
@@ -41,22 +51,13 @@
    	<div class="wrap">
 	    <h2>WP Post To diaspora</h2>
 		<form method="post" action="options.php">
-        	<?php wp_nonce_field('update-options'); ?>
-            <table id="diaspora-setting-form" class="form-table">
-                <tr>
-                    <th scope="row"><label for="diaspora_handle"><?=__('Diaspora Handle');?></label></th>
-                    <td><input type="text" class="regular-text" name="wp_post_to_diaspora_diaspora_handle" id="diaspora_handle" value="<?php echo $handle; ?>" /></td>
-                </tr>
-                <tr>
-                    <th scope="row"><label for="diaspora_password"><?=__('Diaspora Password');?></label></th>
-                    <td><input type="password" class="regular-text" name="wp_post_to_diaspora_diaspora_password" id="diaspora_password" value="<?=$pass;?>" /></td>
-                </tr>
-            </table>
-            	<input type="hidden" name="action" value="update" />
-            	<input type="hidden" name="page_options" value="wp_post_to_diaspora_diaspora_handle,wp_post_to_diaspora_diaspora_password" />
-                <p class="submit"><input type="submit" name="update" value="<?=__('Save Changes');?>" /></p>
-            </form>
-            <form id="diaspora-form" method="post" action="?page=wp-post-to-diaspora%2Fwp-post-to-diaspora.php">
+<?php
+			settings_fields( 'wp_post_to_diaspora_options' );
+			do_settings_sections( 'general' );
+?>
+                	<p class="submit"><input type="submit" name="update" value="<?=__('Save Changes');?>" /></p>
+		</form>
+            <form id="diaspora-form" method="post" action="?page=wp-post-to-diaspora.php">
             	<table class="form-table">
             		<tr>
             			<th scope="row"></th>
