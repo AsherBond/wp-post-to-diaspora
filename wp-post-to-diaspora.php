@@ -33,24 +33,30 @@
 
 		add_settings_section( 'diaspora_general', 'General', 'plugin_section_text', 'general' );
 
+		$default_field_args = array(
+			'class'		=> 'regular-text',
+			'default_value'	=> '',
+			'label'		=> '',
+			'name'		=> '',
+			'type'		=> 'text',
+			'options'	=> '',
+		);
+
 		$field_args_by_id = array();
 
 		$field_args_by_id['handle'] = array(
-			'class'		=> 'regular-text',
 			'label'		=> 'Diaspora Handle',
 			'name'		=> 'handle',
 			'type'		=> 'text'
 		);
 
 		$field_args_by_id['pass'] = array(
-			'class'		=> 'regular-text',
 			'label'		=> 'Diaspora Password',
 			'name'		=> 'password',
 			'type'		=> 'password'
 		);
 
 		$field_args_by_id['protocol'] = array(
-			'class'		=> 'regular-text',
 			'default_value'	=> Diaspora::HTTPS,
 			'label'		=> 'Connection Type',
 			'name'		=> 'protocol',
@@ -62,6 +68,8 @@
 		);
 
 		foreach ( $field_args_by_id as $id => $field_args ) {
+			$field_args = wp_parse_args( $field_args, $default_field_args );
+
 			$field_args['id'] = $id;
 
 			add_settings_field( $id, $field_args['label'], 'plugin_setting_input', 'general', 'diaspora_general', $field_args );
@@ -70,15 +78,10 @@
 	}
 
 	function plugin_setting_input( $args = array() ) {
-		$default_value = '';
+		$default_value = $args['default_value'];
 		$options = get_option( 'wp_post_to_diaspora_options' );
 		
 		$value = $options[$args['name']];
-
-		if ( isset( $args['default_value'] ) ) {
-			$default_value = $args['default_value'];
-		}
-
 
 		if ( empty( $value ) ) {
 			$value = $default_value;

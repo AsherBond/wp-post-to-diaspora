@@ -14,6 +14,8 @@ gets rolled out.
 
 *****WISH LIST****
 
+Do not store the Diaspora password as plain-text.
+
 Give link shortener choices.
 
 Allow for custom structure of post.
