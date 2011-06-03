@@ -49,6 +49,18 @@
 			'type'		=> 'password'
 		);
 
+		$field_args_by_id['protocol'] = array(
+			'class'		=> 'regular-text',
+			'default_value'	=> Diaspora::HTTPS,
+			'label'		=> 'Connection Type',
+			'name'		=> 'protocol',
+			'type'		=> 'checkbox',
+			'options'	=> array (
+						array( 'label'	=> 'Encrypted',
+						       'value'	=> Diaspora::HTTPS ),
+			)
+		);
+
 		foreach ( $field_args_by_id as $id => $field_args ) {
 			$field_args['id'] = $id;
 
@@ -58,24 +70,63 @@
 	}
 
 	function plugin_setting_input( $args = array() ) {
+		$default_value = '';
 		$options = get_option( 'wp_post_to_diaspora_options' );
-		$type = $options[$args['type']];
+		
 		$value = $options[$args['name']];
+
+		if ( isset( $args['default_value'] ) ) {
+			$default_value = $args['default_value'];
+		}
+
+
+		if ( empty( $value ) ) {
+			$value = $default_value;
+		}
 
 		switch ( $args['type'] ) {
 			case 'text':
 			case 'password':
 				echo "<input id='{$args['id']}' class='{$args['class']}' name='wp_post_to_diaspora_options[{$args['name']}]' type='{$args['type']}' value='$value' />";
 				break;
-			default:
+			case 'checkbox':
+				foreach ($args['options'] as $option) {
+					$checked = '';
 
+					if ( is_array( $value ) ) {
+						if ( in_array($option['value'], $value ) ) {
+							$checked = "checked='checked'";
+						}
+					}
+					else if ( $option['value'] == $value ) {
+						$checked = "checked='checked'";
+					}
+
+					echo "<input id='{$args['id']}' class='{$args['class']}' name='wp_post_to_diaspora_options[{$args['name']}][]' type='{$args['type']}' value='{$option['value']}' $checked /> {$option['label']}";
+				}
+			default:
+			
 				break;
 
 		}
 	}
 
-	function diaspora_options_validate( $input ) {
-		return $input;
+	function diaspora_options_validate( $inputs ) {
+		foreach ( $inputs as $name => $value ) {
+			if ( is_array ( $value ) && ( count( $value ) === 1 ) && ( isset( $value[0] ) ) ) {
+				$inputs[$name] = $value[0];
+			}
+
+			if ( !is_array( $value ) ) {
+				$inputs[$name] = trim( $value );
+			}
+		}
+
+		if ( !isset($inputs['protocol'] ) ) {
+			$inputs['protocol'] = Diaspora::HTTP;
+		}
+
+		return $inputs;
 	}
 
 	function plugin_section_text() {
@@ -129,6 +180,7 @@
 
 		$handle = $options['handle'];
 		$pass = $options['password'];
+		$protocol = $options['protocol'];
 
 		require_once 'wp-post-to-diaspora-options.php';
 	}
@@ -140,6 +192,7 @@
 
 			$handle = $options['handle'];
 			$pass = $options['password'];
+			$protocol = $options['protocol'];
 			$post = get_post ($postID);
 			$str = '%s - %s';
 			$permalink = get_permalink($postID);
@@ -158,8 +211,9 @@
 				$diaspora->setHandle( $handle );
 				$diaspora->setPassword( $pass );
 				$diaspora->setMessage( $content );
+				$diaspora->setProtocol( $protocol );
 
-				$diaspora->postTodiaspora();
+				$diaspora->postToDiaspora();
 			} else {
 				//Just chillax :)
 			}

@@ -13,6 +13,7 @@
 				$diaspora->setHandle( $handle );
 				$diaspora->setPassword( $pass );
 				$diaspora->setMessage( wp_post_to_diaspora_process_content( $content ) );
+				$diaspora->setProtocol( $protocol );
 
 				$diaspora_response = __( $diaspora->postToDiaspora() );
 
