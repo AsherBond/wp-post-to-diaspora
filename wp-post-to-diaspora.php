@@ -18,7 +18,7 @@
 		Original-Author: Glyn Mooney
 		Original-Author URI: http://www.skidoosh.com/
 	*/
-	require_once dirname (__FILE__) . '/Diaspora.php';	
+	require_once dirname (__FILE__) . '/class-diaspora.php';
 	
 	function wp_post_to_diaspora_install () {
 		add_option ('wp_post_to_diaspora_options', '');

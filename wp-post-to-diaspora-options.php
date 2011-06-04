@@ -6,7 +6,7 @@
 			$content = trim ($_POST['content']);
 			if (strlen($content) > 0 && strlen ($content) < MAX_CONTENT_CHAR_LENGTH) {
 
-				require_once dirname (__FILE__) . '/Diaspora.php';
+				require_once dirname (__FILE__) . '/class-diaspora.php';
 
 				$diaspora = new Diaspora();
 
