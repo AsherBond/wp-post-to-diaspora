@@ -50,7 +50,7 @@ class UrlShortener {
 		return $url;
 	}
 
-	/**8
+	/**
 	 * Sends a HTTP GET request to a web service to shorten a web address.
 	 *
 	 * @param string $end_point	The web service url
