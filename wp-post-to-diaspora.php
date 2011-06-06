@@ -20,6 +20,7 @@
 	*/
 	require_once dirname (__FILE__) . '/class-diaspora.php';
 	require_once dirname (__FILE__) . '/class-diaspora-options.php';
+	require_once dirname (__FILE__) . '/class-url-shortener.php';
 
 	$diasporaOptions = new DiasporaOptions();
 	
@@ -33,6 +34,7 @@
 
 	function wp_post_to_diaspora_process_content($content) {
 		$options = get_option ( 'wp_post_to_diaspora_options' );
+		$urlShortener    = new UrlShortener();
 
 		$url_shortener  = $options['url_shortener'];
 		$pattern = '/(?#Protocol)(?:(?:ht|f)tp(?:s?)\:\/\/|~\/|\/)?(?#Username:Password)(?:\w+:\w+@)?(?#Subdomains)(?:(?:[-\w]+\.)+(?#TopLevel Domains)(?:com|org|net|gov|mil|biz|info|mobi|name|aero|jobs|museum|travel|[a-z]{2}))(?#Port)(?::[\d]{1,5})?(?#Directories)(?:(?:(?:\/(?:[-\w~!$+|.,=]|%[a-f\d]{2})+)+|\/)+|\?|#)?(?#Query)(?:(?:\?(?:[-\w~!$+|.,*:]|%[a-f\d{2}])+=?(?:[-\w~!$+|.,*:=]|%[a-f\d]{2})*)(?:&(?:[-\w~!$+|.,*:]|%[a-f\d{2}])+=?(?:[-\w~!$+|.,*:=]|%[a-f\d]{2})*)*)*(?#Anchor)(?:#(?:[-\w~!$+|.,*:=]|%[a-f\d]{2})*)?/';
@@ -40,9 +42,9 @@
 
 		if ((isset($matches[0])) && (is_array($matches[0]))) {
 			foreach ($matches[0] as $match) {
-				$shortened_url = wp_post_to_diaspora_shrink_url($url_shortener, $match);
+				$shortened_url = $urlShortener->shorten($url_shortener, $match);
 				if ($shortened_url !== false) {
-					$content = str_replace($match, wp_post_to_diaspora_shrink_url($url_shortener, $match), $content);
+					$content = str_replace($match, $urlShortener->shorten($url_shortener, $match), $content);
 				}
 			}
 		}
@@ -54,65 +56,6 @@
 		echo wp_post_to_diaspora_process_content($_POST['content']);
 
 		die();
-	}
-
-	function wp_post_to_diaspora_shrink_url($url_shortener, $url) {
-		switch ($url_shortener) {
-			case 'goo.gl':
-				$url = wp_post_to_diaspora_shrink_url_googl($url);
-				break;
-			case 'is.gd':
-				$url = wp_post_to_diaspora_shrink_url_http_get('http://is.gd/create.php?format=simple&url=', $url);
-				break;
-			default:
-				$url = wp_post_to_diaspora_shrink_url_http_get('http://tinyurl.com/api-create.php?url=', $url);
-				break;
-		}
-
-		return $url;
-	}
-
-	function wp_post_to_diaspora_shrink_url_http_get($end_point, $url) {
-		$ch    = curl_init();
-
-		if ($ch !== false) {
-			curl_setopt($ch, CURLOPT_URL, $end_point . $url);
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-			curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
-			$url = curl_exec($ch);
-			curl_close($ch);
-		}
-
-		return $url;
-	}
-
-	function wp_post_to_diaspora_shrink_url_googl($url) {
-		$target = 'https://www.googleapis.com/urlshortener/v1/url';
-
-		$ch             = curl_init();
-		$response       = null;
-
-		if ($ch !== false) {
-			curl_setopt($ch, CURLOPT_URL, $target);
-			curl_setopt($ch, CURLOPT_POST, true);
-			curl_setopt($ch, CURLOPT_POSTFIELDS, '{"longUrl": "' . $url . '"}');
-			curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-			curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
-			$response = curl_exec($ch);
-			curl_close($ch);
-		}
-
-		if ($response !== false) {
-			$json_response = json_decode($response, true);
-
-			if (($json_response !== false) && (isset($json_response['id']))) {
-				$url = $json_response['id'];
-			}
-		}
-
-		return $url;
 	}
 
 	function wp_post_to_diaspora_add_admin_page () {
@@ -131,8 +74,8 @@
 	
 	function wp_post_to_diaspora_post_to_diaspora ($postID) {
 		if (!wp_is_post_revision($postID)) {
-			require_once dirname(__FILE__) . '/diaspora.php';
 			$options = get_option ( 'wp_post_to_diaspora_options' );
+			$urlShortener    = new UrlShortener();
 
 			$handle		= $options['handle'];
 			$pass		= $options['password'];
@@ -143,7 +86,7 @@
 			$str = '%s - %s';
 			$permalink = get_permalink($postID);
 
-			$shortened_url = wp_post_to_diaspora_shrink_url($url_shortener, $permalink);
+			$shortened_url = $urlShortener->shorten( $url_shortener, $permalink );
 			if ($shortened_url !== false) {
 				$content = sprintf($str, $post->post_title, $shortened_url);
 			}
