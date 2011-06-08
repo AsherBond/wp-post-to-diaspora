@@ -8,16 +8,21 @@ require_once 'class-diaspora.php';
  */
 class DiasporaOptions extends PluginOptions {
 
-	const PLUGIN_UID	= 'wp-post-to-diaspora';
-
 	function __construct() {
 		$this->options_name = 'wp_post_to_diaspora_options';
+		$this->uid          = 'wp-post-to-diaspora';
 
 		parent::__construct();
 	}
 
 	public function addPage() {
-		add_options_page ('Post To Diaspora', 'Post To Diaspora', 'manage_options', self::PLUGIN_UID, 'wp_post_to_diaspora_options');
+		$page = add_options_page ('Post To Diaspora', 'Post To Diaspora', 'manage_options', $this->uid, 'wp_post_to_diaspora_options');
+
+		$this->addStyle( $page,
+				 WP_PLUGIN_URL . '/' . $this->uid . '/diaspora-options.css',
+				 'admin_print_styles',
+				 'admin_print_styles' . $this->options_name,
+				 array( $this, 'load_admin_styles' ) );
 	}
 
 	/**
@@ -29,6 +34,7 @@ class DiasporaOptions extends PluginOptions {
 		register_setting( $this->options_name, $this->options_name, array( &$this, 'validate' ) );
 
 		add_settings_section( 'diaspora_general', 'General', array( $this, 'renderSectionText' ), 'general' );
+
 
 		$this->field_args_by_id['handle'] = array(
 			'label'         => 'Diaspora Handle',
@@ -111,6 +117,10 @@ class DiasporaOptions extends PluginOptions {
 		}
 
 		return $inputs;
+	}
+
+	function load_admin_styles() {
+		wp_enqueue_style( $this->hooks['admin_print_styles' . $this->options_name] );
 	}
 
 }

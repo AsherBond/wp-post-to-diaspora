@@ -16,6 +16,13 @@ class PluginOptions {
 	protected $field_args_by_id;
 
 	/**
+	 * Stores WordPress action hooks by a key for later reference.
+	 *
+	 * @var array
+	 */
+	protected $action_hooks = array();
+
+	/**
 	 * The name to use to save and retrieve the options.
 	 *
 	 * @var string
@@ -28,6 +35,13 @@ class PluginOptions {
 	 * @var array
 	 */
 	protected $render_field_method;
+
+	/**
+	 * Unique string that identifies this plugin.
+	 *
+	 * @var string
+	 */
+	protected $uid;
 
 	function __construct() {
 		$this->default_field_args = array(
@@ -51,6 +65,26 @@ class PluginOptions {
 	 */
 	public function addPage() {
 
+	}
+
+	/**
+	 * Adds a style to a specific page.
+	 *
+	 * @param string $page			The page hook to apply the style.
+	 * @param string $stylesheet		Reference to the stylesheet.
+	 * @param string $action_hook		Wordpress action hook to apply the style.
+	 * @param string $action_hook_key	Key for referencing the action_hook at a later time.
+	 * @param array  $enqueue_function	Reference to a function that actually loads
+	 *					the stylesheet.  Since we are dealing
+	 *					with objects it takes the 
+	 *					form of array( $this, 'function_name' )
+	 */
+	public function addStyle( $page, $stylesheet, $action_hook, $action_hook_key, $enqueue_function ) {
+		wp_register_style( $this->uid . '-' . $action_hook . '-' . $page, $stylesheet );
+
+		add_action( $action_hook . '-' . $page, $enqueue_function );
+
+		$this->hooks[$action_hook_key] = $this->uid . '-' . $action_hook . '-' . $page;
 	}
 
 	public function initialize() {
