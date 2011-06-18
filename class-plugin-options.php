@@ -164,6 +164,101 @@ class PluginOptions {
 		}
 	}
 
+	/**
+	 * Perform field input validation on the supported type of validation. The type of validation
+	 * is driven by the field_args_by_id property.
+	 *
+	 * Supported elements are:
+	 *
+	 * <ul>
+	 * 	<li>required - The field must have a value.</li>
+	 *	<li>regex - The field must match the regular expression if it is populated.</li>
+	 * </ul>
+	 *
+	 * @param string $input_name Form input name.
+	 * @param string $input_value Form input value.
+	 */
+	protected function validateValue( $input_name, $input_value ) {
+		if ( ( isset( $this->field_args_by_id[$input_name]['validate'] ) ) && ( is_array( $this->field_args_by_id[$input_name]['validate'] ) ) ) {
+			foreach ( $this->field_args_by_id[$input_name]['validate'] as $validation_function => $validation_param) {
+				switch ( $validation_function ) {
+					case 'required':
+						$is_valid = $this->validateRequired( $input_name, $input_value );
+						break;
+
+					case 'regex':
+						$is_valid = $this->validateRegex( $input_name, $input_value );
+						break;
+
+					default:
+						break;	
+				}
+
+				if ( $is_valid === false ) {
+					break;
+				}
+			}
+		}
+	}
+
+	/**
+	 * Ensures that a form field has a value.
+	 *
+	 * @param string $input_name Form field to validate.
+	 * @param string $input_value Form value.
+	 * @return bool True if the field has a value.  False if its value is missing.
+	 */
+	private function validateRequired( $input_name, $input_value ) {
+		$is_valid = true;
+
+		if ( empty( $input_value ) ) {
+			$is_valid = false;		
+			$label = $this->field_args_by_id[$input_name]['label'];
+
+			add_settings_error( $input_name, $input_name . '_error', $label . ': A value is required.' );
+		}
+
+		return $is_valid;
+	}
+
+	/**
+	 * Ensures that a form field meets a regular expression criteria if it
+	 * contains a value.  If the validation fails, an error message is shown using the 'regex_error'
+	 * value in the field_args_by_id property.
+	 *
+	 * @param string $input_name Form field to validate.
+	 * @param string $input_value Form value.
+	 * @return bool True if the field satisfies the regular expresse.  False if it does not.
+	 */
+	private function validateRegex( $input_name, $input_value ) {
+		$is_valid = true;
+
+		$field_args = array();
+		if ( isset( $this->field_args_by_id[$input_name] ) ) {		
+			$field_args = $this->field_args_by_id[$input_name];
+		}
+
+		if ( !empty( $input_value ) ) {
+			if ( isset( $field_args['validate']['regex'] ) ) {
+				$match_count = preg_match( $field_args['validate']['regex'], $input_value );
+
+				if ( ( $match_count === 0 ) || ( $match_count === false ) ) {
+					$is_valid = false;		
+					$label = $field_args['label'];
+					$error_message = 'Enter in the correct format.';
+
+					if ( isset( $field_args['validate']['regex_error'] ) ) {
+						$error_message = $field_args['validate']['regex_error'];
+					}
+
+					add_settings_error( $input_name, $input_name . '_error', $label . ': ' . $error_message );
+				}
+			}
+		}
+
+		return $is_valid;
+	}
+
 }
 
 ?>

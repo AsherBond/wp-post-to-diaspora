@@ -39,13 +39,21 @@ class DiasporaOptions extends PluginOptions {
 		$this->field_args_by_id['handle'] = array(
 			'label'         => 'Diaspora Handle',
 			'name'          => 'handle',
-			'type'          => 'text'
+			'type'          => 'text',
+			'validate'      => array(
+				'regex'       => '/^[A-z0-9_]{1,255}@[A-z0-9][A-z0-9\-]{0,62}\.[A-z]{2,3}$/',
+				'regex_error' => 'Enter a handle in the format of username@joindiaspora.com or another pod location if applicable.',
+				'required'    => true
+			)
 		);
 
-		$this->field_args_by_id['pass'] = array(
+		$this->field_args_by_id['password'] = array(
 			'label'         => 'Diaspora Password',
 			'name'          => 'password',
-			'type'          => 'password'
+			'type'          => 'password',
+			'validate'      => array(
+				'required' => true
+			)
 		);
 
 		$this->field_args_by_id['protocol'] = array(
@@ -99,7 +107,6 @@ class DiasporaOptions extends PluginOptions {
 	 * @todo Add validation routines here.
 	 */
 	public function validate( $inputs ) {
-	
 		if ( is_array( $inputs ) ) {
 			foreach ( $inputs as $name => $value ) {
 				if ( is_array ( $value ) && ( count( $value ) === 1 ) && ( isset( $value[0] ) ) ) {
@@ -109,7 +116,12 @@ class DiasporaOptions extends PluginOptions {
 				if ( !is_array( $value ) ) {
 					$inputs[$name] = trim( $value );
 				}
+
+				if ( isset($this->field_args_by_id[$name]['validate'] ) ) {
+					$this->validateValue( $name, $inputs[$name] );
+				}
 			}
+
 		}
 
 		if ( !isset($inputs['protocol'] ) ) {
