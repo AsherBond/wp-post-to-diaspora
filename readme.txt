@@ -26,7 +26,6 @@ was a pain to make!
 
 ** TO-DO ITEMS **
 
-1.  Reapply Untitaker's commit.
 2.  Add field validation to the Post to Diaspora settings page.
 3.  Add a Diaspora button on the Add New Post page that a user can click on to "Share with Diaspora"
     when the post is published to their blog.  Have it operate in a similiar manner that the

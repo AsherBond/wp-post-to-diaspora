@@ -87,15 +87,17 @@ class Diaspora {
 		$ch = curl_init();
 
 		if ($ch !== false) {
-			curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);
-			curl_setopt($ch, CURLOPT_URL, $host);
-			curl_setopt($ch, CURLOPT_VERBOSE, 1);
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-			//curl_setopt($ch, CURLOPT_USERPWD, "$username:$password");
-			curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
-			curl_setopt($ch, CURLOPT_POST, 1);
-			curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-type: application/json'));
-			curl_setopt($ch, CURLOPT_POSTFIELDS, $json_string);
+			curl_setopt_array($ch, array(
+				CURLOPT_CONNECTTIMEOUT => 30,
+				CURLOPT_URL => $host,
+				CURLOPT_VERBOSE => 1,
+				CURLOPT_RETURNTRANSFER => 1,
+				//CURLOPT_USERPWD => "$username:$password",
+				CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+				CURLOPT_POST => 1,
+				CURLOPT_HTTPHEADER => array('Content-type: application/json'),
+				CURLOPT_POSTFIELDS => $json_string
+			));
 
 			$result = curl_exec($ch);
 			if ($result !== false) {
