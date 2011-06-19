@@ -26,13 +26,7 @@ was a pain to make!
 
 ** TO-DO ITEMS **
 
-3.  Add a Diaspora button on the Add New Post page that a user can click on to "Share with Diaspora"
-    when the post is published to their blog.  Have it operate in a similiar manner that the
-    "Share with <services>" buttons work within the Diaspora application.
-4.  Add a Diaspora button on the Edit Post page that a user can click on to "Share with Diaspora"
-    in the event that they did not do that on item 3.
-5.  After items 3 and 4 are done, remove the "What are you doing?" section on the Post to Diaspora
-    settings page.
+5.  Remove the "What are you doing?" section on the Post to Diaspora settings page.
 6.  Add a warning to WordPress if they installed the plug-in but have not configured it.
 7.  Add support for url shorteners that require API authentication (e.g., bit.ly).
 

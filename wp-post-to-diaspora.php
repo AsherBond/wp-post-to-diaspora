@@ -1,23 +1,24 @@
 <?php
 	/*
-		 WP Post To diaspora
-		 Info for WordPress:
-		 ==============================================================================
-		 Plugin Name: WP Post To diaspora
-     Plugin URI: http://github.com/maxwell/wp-post-to-diaspora
-     Description: beta plugin to post your new blog posts straight to your diaspora account 
-		Installation
-		
-		All you have to do is download V1 from the link below, unzip it, upload it to your plugins folder and activate it from the plugins menu.
+	 WP Post To diaspora
+	 Info for WordPress:
+	 ==============================================================================
+	 Plugin Name: WP Post To diaspora
+	 Plugin URI: http://github.com/maxwell/wp-post-to-diaspora
+	 Description: beta plugin to post your new blog posts straight to your diaspora account 
+	 Installation
 
-    Version: 1.0.0a
-    Author: Maxwell Salzberg
+	 All you have to do is download V1 from the link below, unzip it, upload it to your plugins folder and activate it from the plugins menu.
 
-    Based on: http://www.skidoosh.co.uk/wordpress-plugins/wordpress-plugin-wp-post-to-twitter/
+	 Version: 1.0.0a
+	 Author: Maxwell Salzberg
 
-		Original-Author: Glyn Mooney
-		Original-Author URI: http://www.skidoosh.com/
+	 Based on: http://www.skidoosh.co.uk/wordpress-plugins/wordpress-plugin-wp-post-to-twitter/
+
+	 Original-Author: Glyn Mooney
+	 Original-Author URI: http://www.skidoosh.com/
 	*/
+
 	require_once dirname (__FILE__) . '/class-diaspora.php';
 	require_once dirname (__FILE__) . '/class-diaspora-options.php';
 	require_once dirname (__FILE__) . '/class-url-shortener.php';
@@ -69,40 +70,46 @@
 	}
 	
 	function wp_post_to_diaspora_post_to_diaspora ($postID) {
-		if (!wp_is_post_revision($postID)) {
-			$options = get_option ( 'wp_post_to_diaspora_options' );
-			$urlShortener    = new UrlShortener();
 
-			$handle		= $options['handle'];
-			$pass		= $options['password'];
-			$protocol	= $options['protocol'];
-			$url_shortener  = $options['url_shortener'];
+		if (( isset( $_POST['wp_post_to_diaspora_options_share_with']['diaspora'] ) ) 
+			&& ( $_POST['wp_post_to_diaspora_options_share_with']['diaspora'] === '1' ) ) {
 
-			$post = get_post ($postID);
-			$str = '%s - %s';
-			$permalink = get_permalink($postID);
+			if (!wp_is_post_revision($postID)) {
+				$options = get_option ( 'wp_post_to_diaspora_options' );
+				$urlShortener    = new UrlShortener();
 
-			$shortened_url = $urlShortener->shorten( $url_shortener, $permalink );
-			if ($shortened_url !== false) {
-				$content = sprintf($str, $post->post_title, $shortened_url);
-			}
-			else {
-				$content = sprintf($str, $post->post_title, $permalink);
-			}
+				$handle		= $options['handle'];
+				$pass		= $options['password'];
+				$protocol	= $options['protocol'];
+				$url_shortener  = $options['url_shortener'];
 
-			if ((!empty($handle))  && (!empty($pass))) {
-				$diaspora = new Diaspora();
+				$post = get_post ($postID);
+				$str = '%s - %s';
+				$permalink = get_permalink($postID);
 
-				$diaspora->setHandle( $handle );
-				$diaspora->setPassword( $pass );
-				$diaspora->setMessage( $content );
-				$diaspora->setProtocol( $protocol );
+				$shortened_url = $urlShortener->shorten( $url_shortener, $permalink );
+				if ($shortened_url !== false) {
+					$content = sprintf($str, $post->post_title, $shortened_url);
+				}
+				else {
+					$content = sprintf($str, $post->post_title, $permalink);
+				}
 
-				$diaspora->postToDiaspora();
-			} else {
-				//Just chillax :)
+				if ((!empty($handle))  && (!empty($pass))) {
+					$diaspora = new Diaspora();
+
+					$diaspora->setHandle( $handle );
+					$diaspora->setPassword( $pass );
+					$diaspora->setMessage( $content );
+					$diaspora->setProtocol( $protocol );
+
+					$diaspora->postToDiaspora();
+				} else {
+					//Just chillax :)
+				}
 			}
 		}
+
 	}
 	
 	register_activation_hook(__FILE__, 'wp_post_to_diaspora_install');

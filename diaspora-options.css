@@ -14,3 +14,30 @@
 	width: 85px;
 	text-align: right;
 }
+
+#diaspora-share-with {
+	border-top: 1px solid #eee;
+}
+
+#diaspora-share-with label {
+	margin-right: 5px;
+}
+
+#diaspora-share-with img {
+	border: 1px solid black;
+	border-radius: 2px;
+	-webkit-border-radius: 2px;
+	-moz-border-radius: 2px;
+	cursor: pointer;
+	vertical-align: middle;
+}
+
+#diaspora-share-with img#diaspora {
+	padding: 1px 0px 0px 1px;
+}
+
+.diaspora-faded {
+	filter: alpha(opacity=20);
+	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=20)";
+	opacity: 0.2;
+}

@@ -18,11 +18,11 @@ class DiasporaOptions extends PluginOptions {
 	public function addPage() {
 		$page = add_options_page ('Post To Diaspora', 'Post To Diaspora', 'manage_options', $this->uid, 'wp_post_to_diaspora_options');
 
-		$this->addStyle( $page,
-				 WP_PLUGIN_URL . '/' . $this->uid . '/diaspora-options.css',
-				 'admin_print_styles',
-				 'admin_print_styles' . $this->options_name,
-				 array( $this, 'load_admin_styles' ) );
+		wp_register_style( $this->uid . '-stylesheets', WP_PLUGIN_URL . '/' . $this->uid . '/diaspora-options.css' );
+		wp_enqueue_style( $this->uid . '-stylesheets' );
+
+		wp_register_script( $this->uid . '-scripts', WP_PLUGIN_URL . '/' . $this->uid . '/diaspora-options.js' );
+		wp_enqueue_script( $this->uid . '-scripts' );
 	}
 
 	/**
@@ -92,6 +92,8 @@ class DiasporaOptions extends PluginOptions {
 			}
 		}
 
+		add_action( 'post_submitbox_misc_actions', array( $this, 'postMiscOptions' ) );
+
         }
 
 	/**
@@ -103,8 +105,6 @@ class DiasporaOptions extends PluginOptions {
 
 	/**
 	 * Rids input of excess spaces and defaults the protocol to HTTP if none is specified.
-	 *
-	 * @todo Add validation routines here.
 	 */
 	public function validate( $inputs ) {
 		if ( is_array( $inputs ) ) {
@@ -131,8 +131,19 @@ class DiasporaOptions extends PluginOptions {
 		return $inputs;
 	}
 
-	function load_admin_styles() {
-		wp_enqueue_style( $this->hooks['admin_print_styles' . $this->options_name] );
+	/**
+	 * Displays miscellaneous options that appear in the Publish Widget on the post page.
+	 * This appears above the Publish/Update button.
+	 */
+	public function postMiscOptions() {
+		$uri = substr(dirname(__FILE__), strrpos(dirname(__FILE__), DIRECTORY_SEPARATOR));
+		$images_dir = plugins_url() . $uri . '/images';
+
+		echo '<div class="misc-pub-section" id="diaspora-share-with">';
+		echo '  <label for="diaspora-share-with-options">Click to share with:</label>';
+		echo '  <img alt="Diaspora" class="diaspora-faded" id="diaspora" src="' . $images_dir . '/icons/diaspora-16x16.png" title="Diaspora" />';
+		echo '  <input type="hidden" name="' . $this->options_name . '_share_with[diaspora]" value="0" />';
+		echo '</div>';
 	}
 
 }
