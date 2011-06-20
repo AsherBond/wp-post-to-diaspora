@@ -41,3 +41,8 @@
 	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=20)";
 	opacity: 0.2;
 }
+
+.diaspora-warning, .diaspora-warning a {
+	color: red;
+	font-weight: bold;
+}

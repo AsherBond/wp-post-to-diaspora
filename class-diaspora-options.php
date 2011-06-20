@@ -35,7 +35,6 @@ class DiasporaOptions extends PluginOptions {
 
 		add_settings_section( 'diaspora_general', 'General', array( $this, 'renderSectionText' ), 'general' );
 
-
 		$this->field_args_by_id['handle'] = array(
 			'label'         => 'Diaspora Handle',
 			'name'          => 'handle',
@@ -93,7 +92,6 @@ class DiasporaOptions extends PluginOptions {
 		}
 
 		add_action( 'post_submitbox_misc_actions', array( $this, 'postMiscOptions' ) );
-
         }
 
 	/**
@@ -134,8 +132,12 @@ class DiasporaOptions extends PluginOptions {
 	/**
 	 * Displays miscellaneous options that appear in the Publish Widget on the post page.
 	 * This appears above the Publish/Update button.
+	 *
+	 * Emits a warning if a handle and password are not set.
 	 */
 	public function postMiscOptions() {
+		$options = get_option( $this->options_name );
+
 		$uri = substr(dirname(__FILE__), strrpos(dirname(__FILE__), DIRECTORY_SEPARATOR));
 		$images_dir = plugins_url() . $uri . '/images';
 
@@ -143,7 +145,11 @@ class DiasporaOptions extends PluginOptions {
 		echo '  <label for="diaspora-share-with-options">Click to share with:</label>';
 		echo '  <img alt="Diaspora" class="diaspora-faded" id="diaspora" src="' . $images_dir . '/icons/diaspora-16x16.png" title="Diaspora" />';
 		echo '  <input type="hidden" name="' . $this->options_name . '_share_with[diaspora]" value="0" />';
+		if ( ( empty( $options['handle']) ) || ( empty($options['password']) ) ) {
+			echo '<p class="diaspora-warning">Attention: <a href="' . get_admin_url() . 'options-general.php?page=wp-post-to-diaspora">Configure before using.</a></p>';
+		}
 		echo '</div>';
+
 	}
 
 }
