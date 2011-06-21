@@ -97,38 +97,52 @@ class PluginOptions {
 	 * @param array $args	An array of field arguments.
 	 */
 	public function renderField( $args = array() ) {
-		$default_value = $args['default_value'];
-		$options = get_option( $this->options_name );
+		$class         = '';
+		$default_value = '';
+		$id            = '';
+		$name          = '';
+		$type          = '';
+		$value         = '';
 
-		$value = $options[$args['name']];
+		$arg_keys      = array( 'class', 'default_value', 'id', 'name', 'type' );
+
+		foreach ( $arg_keys as  $arg_key ) {
+			if ( isset( $args[$arg_key] ) ) {
+				$$arg_key = $args[$arg_key];
+			}
+		}
+
+		$options = get_option( $this->options_name );
 
 		if ( empty( $value ) ) {
 			$value = $default_value;
 		}
 
-		switch ( $args['type'] ) {
+		switch ( $type ) {
 			case 'text':
 			case 'password':
 
-				echo "<input id='{$args['id']}' class='{$args['class']}' name='wp_post_to_diaspora_options[{$args['name']}]' type='{$args['type']}' value='$value' />";
+				echo "<input id='$id' class='$class' name='wp_post_to_diaspora_options[{$name}]' type='$type' value='$value' />";
 
 				break;
 
 			case 'checkbox':
 
-				foreach ($args['options'] as $option) {
-					$checked = '';
+				if ( ( isset( $args['options'] ) ) && ( is_array( $args['options'] ) ) ) {
+					foreach ($args['options'] as $option) {
+						$checked = '';
 
-					if ( is_array( $value ) ) {
-						if ( in_array($option['value'], $value ) ) {
+						if ( is_array( $value ) ) {
+							if ( in_array($option['value'], $value ) ) {
+								$checked = "checked='checked'";
+							}
+						}
+						else if ( $option['value'] == $value ) {
 							$checked = "checked='checked'";
 						}
-					}
-					else if ( $option['value'] == $value ) {
-						$checked = "checked='checked'";
-					}
 
-					echo "<input id='{$args['id']}' class='{$args['class']}' name='wp_post_to_diaspora_options[{$args['name']}][]' type='{$args['type']}' value='{$option['value']}' $checked /> {$option['label']}";
+						echo "<input id='$id' class='$class' name='wp_post_to_diaspora_options[{$name}][]' type='$type' value='{$option['value']}' $checked /> {$option['label']}";
+					}
 				}
 
 				break;
@@ -136,22 +150,24 @@ class PluginOptions {
 			case 'select':
 			case 'select-one':
 
-				echo "<select id='{$args['id']}' class='{$args['class']}' name='wp_post_to_diaspora_options[{$args['name']}][]'>";
+				echo "<select id='$id' class='$class' name='wp_post_to_diaspora_options[{$name}][]'>";
 
-				foreach ($args['options'] as $option) {
-					$selected = '';
+				if ( ( isset( $args['options'] ) ) && ( is_array( $args['options'] ) ) ) {
+					foreach ($args['options'] as $option) {
+						$selected = '';
 
-					if ( is_array( $value ) ) {
-						if ( in_array($option['value'], $value ) ) {
+						if ( is_array( $value ) ) {
+							if ( in_array($option['value'], $value ) ) {
+								$selected = "selected='selected'";
+							}
+						}
+						else if ( $option['value'] == $value ) {
 							$selected = "selected='selected'";
 						}
-					}
-					else if ( $option['value'] == $value ) {
-						$selected = "selected='selected'";
-					}
 
-					echo "<option value='{$option['value']}' $selected>{$option['label']}</option>";
+						echo "<option value='{$option['value']}' $selected>{$option['label']}</option>";
 
+					}
 				}
 
 				echo "</select>";
