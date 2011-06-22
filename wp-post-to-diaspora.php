@@ -59,16 +59,6 @@
 		die();
 	}
 
-	function wp_post_to_diaspora_options () {
-		$options = get_option( 'wp_post_to_diaspora_options' );
-
-		$handle = $options['handle'];
-		$pass = $options['password'];
-		$protocol = $options['protocol'];
-
-		require_once 'wp-post-to-diaspora-options.php';
-	}
-	
 	function wp_post_to_diaspora_post_to_diaspora ($postID) {
 
 		if (( isset( $_POST['wp_post_to_diaspora_options_share_with']['diaspora'] ) ) 

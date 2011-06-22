@@ -16,7 +16,7 @@ class DiasporaOptions extends PluginOptions {
 	}
 
 	public function addPage() {
-		$page = add_options_page ('Post To Diaspora', 'Post To Diaspora', 'manage_options', $this->uid, 'wp_post_to_diaspora_options');
+		$page = add_options_page ('Post To Diaspora', 'Post To Diaspora', 'manage_options', $this->uid, array( &$this, 'renderOptionsPage' ) );
 
 		wp_register_style( $this->uid . '-stylesheets', WP_PLUGIN_URL . '/' . $this->uid . '/diaspora-options.css' );
 		wp_enqueue_style( $this->uid . '-stylesheets' );
@@ -150,6 +150,19 @@ class DiasporaOptions extends PluginOptions {
 		}
 		echo '</div>';
 
+	}
+
+	public function renderOptionsPage() {
+		echo '<div class="wrap">';
+		echo '	<h2>WP Post To Diaspora</h2>';
+		echo '	<form method="post" action="options.php">';
+
+		settings_fields( 'wp_post_to_diaspora_options' );
+		do_settings_sections( 'general' );
+
+		echo '		<p class="submit"><input type="submit" name="update" value="' . __('Save Changes') . '" /></p>';
+		echo '	</form>';
+		echo '</div>';
 	}
 
 }

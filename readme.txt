@@ -26,7 +26,6 @@ was a pain to make!
 
 ** TO-DO ITEMS **
 
-5.  Remove the "What are you doing?" section on the Post to Diaspora settings page.
 7.  Add support for url shorteners that require API authentication (e.g., bit.ly).
 
 ***things I [Maxwell] will be fixing***
