@@ -1,23 +1,16 @@
 <?php
-	/*
-	 WP Post To diaspora
-	 Info for WordPress:
-	 ==============================================================================
-	 Plugin Name: WP Post To diaspora
-	 Plugin URI: http://github.com/maxwell/wp-post-to-diaspora
-	 Description: beta plugin to post your new blog posts straight to your diaspora account 
-	 Installation
+/*
+ Plugin Name: WP Post To Diaspora
+ Plugin URI: http://github.com/diaspora/wp-post-to-diaspora
+ Description: Beta plugin to post your new blog posts straight to your diaspora account.
+ Version 1.0.0.a
+ Author: Maxwell Salzberg
 
-	 All you have to do is download V1 from the link below, unzip it, upload it to your plugins folder and activate it from the plugins menu.
+ Significantly revised version of: http://www.skidoosh.co.uk/wordpress-plugins/wordpress-plugin-wp-post-to-twitter/
 
-	 Version: 1.0.0a
-	 Author: Maxwell Salzberg
-
-	 Based on: http://www.skidoosh.co.uk/wordpress-plugins/wordpress-plugin-wp-post-to-twitter/
-
-	 Original-Author: Glyn Mooney
-	 Original-Author URI: http://www.skidoosh.com/
-	*/
+ Original-Author: Glyn Mooney
+ Original-Author URI: http://www.skidoosh.com/
+*/
 
 	require_once dirname (__FILE__) . '/class-diaspora.php';
 	require_once dirname (__FILE__) . '/class-diaspora-options.php';

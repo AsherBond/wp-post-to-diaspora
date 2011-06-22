@@ -1,43 +1,39 @@
+=== WP Post to Diaspora ===
+Contributors:
+Tags: posts, diaspora
+Tested up to: 3.1.3
+Requires at least: 3.0
 
-Update Diaspora from your Wordpress!
+Shares Wordpress posts to your Diaspora account.
 
+== Description ==
 
-Bad things that are true because I don't actually know PHP:
+Shares Wordpress posts to your Diaspora account from the Add New Post and Edit Post pages.
+Click on the asterik icon above the publish button to post your blog entry to Diaspora.  The entry
+will shared when Wordpress publishes it.
 
-- it still uses Diaspora's token auth.  We should switch to OAuth once it
-gets rolled out.
+At this point the plugin will not work until the as_note branch of Diaspora is merged.
 
-- since it was a hack job from a twitter plugin, I only replaced what
-  was absolutely necessary to change.
+== Installation ==
 
+1.  Create a directory wp-post-to-diaspora in wp-content/plugins.  Upload the contents of this plugin
+    into wp-content/plugins/wp-post-to-diaspora.
+2.  Navigate to Settings, Post to Diaspora.
+3.  At minimum fill in the Diaspora Handle and Password fields. (Note:  The password is stored in
+    plaintext.  The will become a non-issue once the oauth branch is merged in and integrated into
+    this plugin.)
+4.  Click Save Changes.
 
+== Frequently Asked Questions ==
 
-*****WISH LIST****
+= Why doesn't this plugin work? =
 
-Do not store the Diaspora password as plain-text.
+It depends on an as_note branch of the Diaspora project.  It is a work-in-progress and is not
+merged into the codebase that all pods (servers) use.
 
-Allow for custom structure of post.
+= What work is remaining? =
 
-Anything to make this a better plugin.  I am just hacking hacking
-hacking this away, so if you know anything about Wordpress plugins, you know better than I do.
-
-Also, I'd love some info on better Wordpress development workflow.  This
-was a pain to make!
-
-** TO-DO ITEMS **
-
-7.  Add support for url shorteners that require API authentication (e.g., bit.ly).
-
-***things I [Maxwell] will be fixing***
-the json structure that Diaspora accepts is rapidly changing.  I will be
-updating it ASAP.  Anything around that is up for grabs to make better.
-
-I am going to be using this as soon as possible from my blog
-http://blog.sourcedecay.net
-
-
-
-based completely on:
-http://www.skidoosh.co.uk/wordpress-plugins/wordpress-plugin-wp-post-to-twitter/
-
+1. Allow for custom structure of post.
+2. The JSON structure that Diaspora accepts is rapidly changing.  I [Maxwell] will be updating it
+ASAP. 
 
