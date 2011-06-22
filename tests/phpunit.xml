@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<phpunit>
+	<php>
+		<includePath>..</includePath>
+	</php>
+	<testsuites>
+		<testsuite name="WP Post To Diaspora Test Suite">
+			<directory suffix=".php">.</directory>
+		</testsuite>
+	</testsuites>
+	<groups>
+		<exclude>
+			<group>third_party_url_shorteners</group>
+		</exclude>
+	</groups>
+</phpunit>

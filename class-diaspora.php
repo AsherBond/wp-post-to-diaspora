@@ -120,9 +120,9 @@ class Diaspora {
 					$diaspora_status="Error posting to Diaspora. Retry Code: {$resultArray['http_code']}";
 				}
 			}
-
-			return $diaspora_status;
 		}
+
+		return $diaspora_status;
 	}
 
 }
