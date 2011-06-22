@@ -1,20 +1,3 @@
-.diaspora-mimic, .diaspora-mimic tr, .diaspora-mimic th, .diaspora-mimic td, .diaspora-mimic h3, .diaspora-mimic p {
-	margin: 0;
-	padding: 0;
-}
-.diaspora-mimic h3 {
-	width: 400px;
-	font-size: 20px;
-	color: #333;
-}
-.diaspora-mimic p {
-	margin-top: -5px;
-	font-size: 24px;
-	color: #ccc;
-	width: 85px;
-	text-align: right;
-}
-
 #diaspora-share-with {
 	border-top: 1px solid #eee;
 }
