@@ -73,6 +73,7 @@ class PluginOptions {
 		$class         = '';
 		$default_value = '';
 		$id            = '';
+		$input_name    = '';
 		$name          = '';
 		$type          = '';
 		$value         = '';
@@ -95,11 +96,20 @@ class PluginOptions {
 			$value = $default_value;
 		}
 
+		
+		if ( empty( $this->options_name) ) {
+			$input_name = $name;
+		}
+		else {
+			$input_name = $this->options_name . '[' . $name . ']';
+
+		}
+
 		switch ( $type ) {
 			case 'text':
 			case 'password':
 
-				echo "<input id='$id' class='$class' name='wp_post_to_diaspora_options[{$name}]' type='$type' value='$value' />";
+				echo "<input id='$id' class='$class' name='$input_name' type='$type' value='$value' />";
 
 				break;
 
@@ -118,7 +128,7 @@ class PluginOptions {
 							$checked = "checked='checked'";
 						}
 
-						echo "<input id='$id' class='$class' name='wp_post_to_diaspora_options[{$name}][]' type='$type' value='{$option['value']}' $checked /> {$option['label']}";
+						echo "<input id='$id' class='$class' name='{$input_name}[]' type='$type' value='{$option['value']}' $checked /> {$option['label']}";
 					}
 				}
 
@@ -127,7 +137,7 @@ class PluginOptions {
 			case 'select':
 			case 'select-one':
 
-				echo "<select id='$id' class='$class' name='wp_post_to_diaspora_options[{$name}][]'>";
+				echo "<select id='$id' class='$class' name='$input_name'>";
 
 				if ( ( isset( $args['options'] ) ) && ( is_array( $args['options'] ) ) ) {
 					foreach ($args['options'] as $option) {

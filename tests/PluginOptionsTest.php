@@ -6,11 +6,6 @@ require 'class-plugin-options.php';
  */
 class PluginOptionsTest extends PHPUnit_Framework_TestCase {
 
-	/**
-	 * @todo remove hard-coding of wp_post_to_diaspora_options in the input names
-	 */
-	const UID = 'wp_post_to_diaspora_options';
-
 	public function testRenderTextField() {
 
 		$options = new PluginOptions();
@@ -21,7 +16,7 @@ class PluginOptionsTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertStringStartsWith('<input', $result);	
 		$this->assertContains("type='text'", $result);	
-		$this->assertContains("name='" . PluginOptionsTest::UID . "[username]'", $result);	
+		$this->assertContains("name='username'", $result);	
 
 
 		$options = new PluginOptions();
@@ -34,7 +29,7 @@ class PluginOptionsTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertStringStartsWith('<input', $result);	
 		$this->assertContains("class='required'", $result);	
-		$this->assertContains("name='" . PluginOptionsTest::UID . "[username]'", $result);	
+		$this->assertContains("name='username", $result);	
 		$this->assertContains("type='text'", $result);	
 		$this->assertContains("value='robinson'", $result);	
 
@@ -50,7 +45,7 @@ class PluginOptionsTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertStringStartsWith('<input', $result);	
 		$this->assertContains("type='password'", $result);	
-		$this->assertContains("name='" . PluginOptionsTest::UID . "[username]'", $result);	
+		$this->assertContains("name='username", $result);	
 		
 
 		$options = new PluginOptions();
@@ -63,7 +58,7 @@ class PluginOptionsTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertStringStartsWith('<input', $result);	
 		$this->assertContains("class='required'", $result);	
-		$this->assertContains("name='" . PluginOptionsTest::UID . "[username]'", $result);	
+		$this->assertContains("name='username'", $result);	
 		$this->assertContains("type='password'", $result);	
 		$this->assertContains("value='Rz!j5Aklp7#'", $result);	
 
@@ -92,7 +87,7 @@ class PluginOptionsTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertStringStartsWith('<input', $result);	
 		$this->assertContains("type='checkbox'", $result);	
-		$this->assertContains("name='" . PluginOptionsTest::UID . "[choices][]'", $result);	
+		$this->assertContains("name='choices[]'", $result);	
 		$this->assertContains("value='Value_1'", $result);	
 		$this->assertStringEndsWith("/> Label_1", $result);	
 
@@ -120,7 +115,7 @@ class PluginOptionsTest extends PHPUnit_Framework_TestCase {
 
 				$this->assertStringStartsWith('<input', $result);	
 				$this->assertContains("type='checkbox'", $result);	
-				$this->assertContains("name='" . PluginOptionsTest::UID . "[choices][]'", $result);	
+				$this->assertContains("name='choices[]'", $result);	
 				$this->assertContains("value='Value_" . ($index + 1) . "'", $result);	
 				$this->assertStringEndsWith("/>", $result);	
 			}
@@ -160,10 +155,7 @@ class PluginOptionsTest extends PHPUnit_Framework_TestCase {
 		$xml = new SimpleXmlElement($result);
 		$index = 1;
 
-		/**
-		 * @todo remove the ending [] from the select name
-		 */
-		$this->assertContains(PluginOptionsTest::UID . '[choices][]', (string) $xml['name']);
+		$this->assertContains('choices', (string) $xml['name']);
 
 		foreach ($xml->option as $option) {
 			$this->assertEquals('Label_' . $index, (string) $option[0]);
