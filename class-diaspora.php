@@ -8,6 +8,9 @@ class Diaspora {
 	const HTTP  = 'http';
 	const HTTPS = 'https';
 
+	const WP_MESSAGE_PUBLISHED_UPDATE = 1;
+	const WP_MESSAGE_PUBLISHED        = 6;
+
 	/**
 	 * Fully qualified handle in the form of username@server_domain
 	 * @var string
@@ -40,8 +43,19 @@ class Diaspora {
 
 	private $protocol;
 
+	/**
+	 * Prefix identifier to hold transient (cached) information.
+	 *
+	 * WordPress does not use sessions.  I prefer not use GET parameters or
+	 * cookies to send success/error messages between page requests.
+	 * @var string
+	 */
+	private $transient_name_prefix = 'wp_post_to_diaspora';
+
 	function __construct() {
 		$this->protocol = self::HTTPS;
+
+		add_filter( 'post_updated_messages', array( &$this, 'diasporaPostUpdatedMessages' ), 10, 1 );
 	}
 
 	public function setHandle( $handle ) {
@@ -71,6 +85,7 @@ class Diaspora {
 	 * Sends a WordPress post to a Diaspora server.
 	 */
 	function postToDiaspora() {
+		$id                = get_the_ID();
 		$processed_message = $this->message;
 
 		if ( ( empty( $this->username ) ) || ( empty( $this->server_domain ) ) ) {
@@ -82,7 +97,6 @@ class Diaspora {
 			$host = $this->protocol . '://' . $this->server_domain . '/activity_streams/notes.json';
 
 			$resultArray = null;
-			$diaspora_status = '';
 
 			$ch = curl_init();
 
@@ -115,14 +129,51 @@ class Diaspora {
 
 			if (is_array($resultArray)) {
 				if ($resultArray['http_code'] == "200") {
-					$diaspora_status='You just posted!';
-				} else {
-					$diaspora_status="Error posting to Diaspora. Retry Code: {$resultArray['http_code']}";
+					$diaspora_status = 'Posted to Diaspora successfully.';
+				}
+				else {
+					$diaspora_status = "Error posting to Diaspora. Retry Code: {$resultArray['http_code']}";
 				}
 			}
 		}
 
+		set_transient( $this->transient_name_prefix . '_diaspora_status_' . $id, $diaspora_status, 60 );
+
 		return $diaspora_status;
+	}
+
+	/**
+	 * Append the return status from Diaspora to the published or updated message.
+	 *
+	 * @param $message Status messages for post and page actions.  Refer to the
+	 *                 message array declared in wp-admin/edit-form-advanced.php 
+	 * @return array   A message array with the Diaspora return status appended to
+	 *                 the text of WordPress return codes of 4 (updated) and 
+	 *                 6 (an update to a published post).
+	 */
+	public function diasporaPostUpdatedMessages( $messages ) {
+		$wp_message = '';
+
+		if ( isset( $_GET['message'] ) ) {
+			$wp_message = $_GET['message'];
+		}
+
+		if ( ( $wp_message == self::WP_MESSAGE_PUBLISHED_UPDATE ) ||
+		     ( $wp_message == self::WP_MESSAGE_PUBLISHED) ) {
+
+			$id = get_the_ID();
+			$diaspora_status = get_transient( $this->transient_name_prefix . '_diaspora_status_' . $id );
+
+			if ( !empty( $diaspora_status) ) {
+				delete_transient( $this->transient_name_prefix . '_diaspora_status_'  . $id);
+
+				$messages['post'][self::WP_MESSAGE_PUBLISHED_UPDATE] .= '. ' . $diaspora_status;
+				$messages['post'][self::WP_MESSAGE_PUBLISHED] .= '. ' . $diaspora_status;
+			}
+
+		}
+
+		return $messages;
 	}
 
 }

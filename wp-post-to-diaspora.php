@@ -16,6 +16,7 @@
 	require_once dirname (__FILE__) . '/class-diaspora-options.php';
 	require_once dirname (__FILE__) . '/class-url-shortener.php';
 
+	$diaspora        = new Diaspora();
 	$diasporaOptions = new DiasporaOptions();
 	
 	function wp_post_to_diaspora_install () {
@@ -99,4 +100,5 @@
 	register_deactivation_hook(__FILE__, 'wp_post_to_diaspora_remove');
 	add_action('publish_post', 'wp_post_to_diaspora_post_to_diaspora');
 	add_action('wp_ajax_js_shrink_urls', 'wp_post_to_diaspora_process_content_to_string');
+
 ?>

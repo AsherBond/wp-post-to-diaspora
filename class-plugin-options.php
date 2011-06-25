@@ -102,7 +102,6 @@ class PluginOptions {
 		}
 		else {
 			$input_name = $this->options_name . '[' . $name . ']';
-
 		}
 
 		switch ( $type ) {
