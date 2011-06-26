@@ -85,6 +85,7 @@ class Diaspora {
 	 * Sends a WordPress post to a Diaspora server.
 	 */
 	function postToDiaspora() {
+		$diaspora_status   = '';
 		$id                = get_the_ID();
 		$processed_message = $this->message;
 

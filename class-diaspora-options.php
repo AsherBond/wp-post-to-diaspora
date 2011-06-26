@@ -16,7 +16,7 @@ class DiasporaOptions extends PluginOptions {
 	}
 
 	public function addPage() {
-		$page = add_options_page ('Post To Diaspora', 'Post To Diaspora', 'manage_options', $this->uid, array( &$this, 'renderOptionsPage' ) );
+		$page = add_options_page ('WP Post To Diaspora', 'WP Post To Diaspora', 'manage_options', $this->uid, array( &$this, 'renderOptionsPage' ) );
 
 		wp_register_style( $this->uid . '-stylesheets', WP_PLUGIN_URL . '/' . $this->uid . '/diaspora-options.css' );
 		wp_enqueue_style( $this->uid . '-stylesheets' );
@@ -91,7 +91,8 @@ class DiasporaOptions extends PluginOptions {
 			}
 		}
 
-		add_action( 'post_submitbox_misc_actions', array( $this, 'postMiscOptions' ) );
+		add_action( 'post_submitbox_misc_actions', array( &$this, 'postMiscOptions' ) );
+		add_filter( 'redirect_post_location', array( &$this, 'redirectPost' ), 10, 2 );
         }
 
 	/**
@@ -138,20 +139,31 @@ class DiasporaOptions extends PluginOptions {
 	public function postMiscOptions() {
 		$options = get_option( $this->options_name );
 
-		$uri = substr(dirname(__FILE__), strrpos(dirname(__FILE__), DIRECTORY_SEPARATOR));
-		$images_dir = plugins_url() . $uri . '/images';
+		$img_class = 'diaspora-faded';
+		$share_with = '0';
+
+		if ( ( isset( $_GET['wptd_share'] ) ) && ( $_GET['wptd_share'] == 'diaspora' ) ) {
+			$img_class = '';
+			$share_with = '1';
+		}
 
 		echo '<div class="misc-pub-section" id="diaspora-share-with">';
 		echo '  <label for="diaspora-share-with-options">Click to share with:</label>';
-		echo '  <img alt="Diaspora" class="diaspora-faded" id="diaspora" src="' . $images_dir . '/icons/diaspora-16x16.png" title="Diaspora" />';
-		echo '  <input type="hidden" name="' . $this->options_name . '_share_with[diaspora]" value="0" />';
+		echo '  <img alt="Diaspora" class="' . $img_class . '" id="diaspora" src="' . $this->plugin_uri . '/images/icons/diaspora-16x16.png" title="Diaspora" />';
+		echo '  <input type="hidden" name="' . $this->options_name . '_share_with[diaspora]" value="' . $share_with .'" />';
+
 		if ( ( empty( $options['handle']) ) || ( empty($options['password']) ) ) {
 			echo '<p class="diaspora-warning">Attention: <a href="' . get_admin_url() . 'options-general.php?page=wp-post-to-diaspora">Configure before using.</a></p>';
 		}
+
 		echo '</div>';
 
 	}
 
+	/**
+	 * Renders the options page that appears on
+	 * Settings -> WP Post to Diaspora.
+	 */
 	public function renderOptionsPage() {
 		echo '<div class="wrap">';
 		echo '	<h2>WP Post To Diaspora</h2>';
@@ -163,6 +175,25 @@ class DiasporaOptions extends PluginOptions {
 		echo '		<p class="submit"><input type="submit" name="update" value="' . __('Save Changes') . '" /></p>';
 		echo '	</form>';
 		echo '</div>';
+	}
+
+	/**
+	 * Retains that state of the Click to share with Diaspora button when a draft post is saved. 
+	 * An extra GET parameter of wptd_share is appended to URL.
+	 *
+	 * Some people may want scheduled posts automatically sent to Diaspora later down the road.
+	 * In that case this information will need to be stored as a custom field within each post.
+	 *
+	 * @param string $location The URL being redirected to.
+	 * @param int $post_id Post id from get_the_ID().
+	 */
+	public function redirectPost( $location, $post_id ) {
+		if ( isset( $_POST[$this->options_name . '_share_with']['diaspora'] ) &&
+		  ( $_POST[$this->options_name . '_share_with']['diaspora'] === '1' ) ) {
+			$location .= '&wptd_share=diaspora';
+		}
+
+		return $location;
 	}
 
 }

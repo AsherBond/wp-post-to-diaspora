@@ -24,4 +24,23 @@ class DiasporaTest extends PHPUnit_Framework_TestCase {
 
 }
 
+/**
+ * Mock WP functions.
+ */
+function add_filter( $a, $b ) {
+
+}
+
+function get_the_ID() {
+
+}
+
+function get_transient() {
+
+}
+
+function set_transient($a, $b, $c) {
+
+}
+
 ?>

@@ -30,6 +30,15 @@ class PluginOptions {
 	protected $render_field_method;
 
 	/**
+	 * The uri of the plugin in the format of '/wp-content/plugins/<plugin directory>'.
+	 * Accounts for situations where someone may install the plugin in a different
+	 * directory from which it is named.
+	 *
+	 * @var string
+	 */
+	protected $plugin_uri;
+
+	/**
 	 * Unique string that identifies this plugin.
 	 *
 	 * @var string
@@ -45,6 +54,8 @@ class PluginOptions {
 			'type'          => 'text',
 			'options'       => '',
 		);
+
+		$this->plugin_uri = plugins_url() . substr(dirname(__FILE__), strrpos(dirname(__FILE__), DIRECTORY_SEPARATOR));
 
 		add_action( 'admin_init', array( &$this, 'initialize' ) );
 		add_action( 'admin_menu', array( &$this, 'addPage' ) );
