@@ -116,6 +116,10 @@ class FunctionalTest extends PHPUnit_Extensions_SeleniumTestCase {
 		$this->assertElementValueEquals('password', 'some_password');
 		$this->assertChecked('protocol');
 		$this->assertSelected('url_shortener', 'Is.gd');
+
+		$this->type('handle', 'test@subdomain.joindiaspora.com');
+		$this->clickAndWait( 'css=input[value="Save Changes"]' );
+		$this->assertElementContainsText('css=div#setting-error-settings_updated strong', 'Settings saved');
 	}
 
 	/**

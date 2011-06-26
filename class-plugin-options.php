@@ -185,7 +185,8 @@ class PluginOptions {
 	 *
 	 * <ul>
 	 * 	<li>required - The field must have a value.</li>
-	 *	<li>regex - The field must match the regular expression if it is populated.</li>
+	 *	<li>regex - The field must match the regular expression if populated.</li>
+	 *	<li>filter - The field must satisfy the PHP filter_var function if populated.</li>
 	 * </ul>
 	 *
 	 * @param string $input_name Form input name.
@@ -201,6 +202,10 @@ class PluginOptions {
 
 					case 'regex':
 						$is_valid = $this->validateRegex( $input_name, $input_value );
+						break;
+
+					case 'filter':
+						$is_valid = $this->validateFilter( $input_name, $input_value );
 						break;
 
 					default:
@@ -241,7 +246,7 @@ class PluginOptions {
 	 *
 	 * @param string $input_name Form field to validate.
 	 * @param string $input_value Form value.
-	 * @return bool True if the field satisfies the regular expresse.  False if it does not.
+	 * @return bool True if the field satisfies the regular expression.  False if it does not.
 	 */
 	private function validateRegex( $input_name, $input_value ) {
 		$is_valid = true;
@@ -265,6 +270,53 @@ class PluginOptions {
 					}
 
 					add_settings_error( $input_name, $input_name . '_error', $label . ': ' . $error_message );
+				}
+			}
+		}
+
+		return $is_valid;
+	}
+
+	/**
+	 * Ensures that a form field meets the requirements of filter_var function (requires PHP 5.2 or higher).
+	 * The requirements of the filter_var function are determined by 'filter' value set in the field_args_by_id
+	 * property.
+	 *
+	 * If the validation fails, an error message is shown using the 'filter_error'
+	 * value in the field_args_by_id property.
+	 *
+	 * @param string $input_name Form field to validate.
+	 * @param string $input_value Form value.
+	 * @return bool True if the field satisfies the filter_var.  False if it does not.
+	 */
+	private function validateFilter( $input_name, $input_value ) {
+		$is_valid = true;
+
+		$field_args = array();
+		if ( isset( $this->field_args_by_id[$input_name] ) ) {		
+			$field_args = $this->field_args_by_id[$input_name];
+		}
+
+		if ( !empty( $input_value ) ) {
+			if ( isset( $field_args['validate']['filter'] ) ) {
+				if ( function_exists( 'filter_var' ) ) {
+					$filter_result = filter_var( $input_value, $field_args['validate']['filter'] );
+
+					if ( $filter_result === false ) {
+						$is_valid = false;
+						$label = $field_args['label'];
+
+						$error_message = 'Enter in the correct format.';
+
+						if ( isset( $field_args['validate']['filter_error'] ) ) {
+							$error_message = $field_args['validate']['filter_error'];
+						}
+
+						add_settings_error( $input_name, $input_name . '_error', $label . ': ' . $error_message );
+					}
+				}
+				else {
+					add_settings_error( $input_name, $input_name . '_error', 'PHP version 5.2 or higher is required.' );
 				}
 			}
 		}

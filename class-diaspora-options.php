@@ -40,8 +40,8 @@ class DiasporaOptions extends PluginOptions {
 			'name'          => 'handle',
 			'type'          => 'text',
 			'validate'      => array(
-				'regex'       => '/^[A-z0-9_]{1,255}@[A-z0-9][A-z0-9\-]{0,62}\.[A-z]{2,3}$/',
-				'regex_error' => 'Enter a handle in the format of username@joindiaspora.com or another pod location if applicable.',
+				'filter'       => FILTER_VALIDATE_EMAIL,
+				'filter_error' => 'Enter a handle in the format of username@joindiaspora.com or another pod location if applicable.',
 				'required'    => true
 			)
 		);
