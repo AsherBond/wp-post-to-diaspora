@@ -1,0 +1,15 @@
+<application>
+	<browser>*firefox</browser>
+	<sites>
+		<site type="wordpress">
+			<url>http://wordpress.localdomain</url>
+			<username>a_username</username>
+			<password>a_password</password>
+		</site>
+		<site type="diaspora">
+			<url>http://diaspora.localdomain</url>
+			<username>a_username</username>
+			<password>a_password</password>
+		</site>
+	</sites>
+<application>
