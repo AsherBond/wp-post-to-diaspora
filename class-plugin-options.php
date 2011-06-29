@@ -75,6 +75,10 @@ class PluginOptions {
 		$this->field_args_by_id = array();
 	}
 
+	public function setFieldArgsById( $id, array &$field_args ) {
+		$this->field_args_by_id[$id] = $field_args;
+	}
+
 	/**
 	 * Renders a field on the screen.
 	 *
@@ -251,12 +255,12 @@ class PluginOptions {
 	private function validateRegex( $input_name, $input_value ) {
 		$is_valid = true;
 
-		$field_args = array();
-		if ( isset( $this->field_args_by_id[$input_name] ) ) {		
-			$field_args = $this->field_args_by_id[$input_name];
-		}
-
 		if ( !empty( $input_value ) ) {
+			$field_args = array();
+			if ( isset( $this->field_args_by_id[$input_name] ) ) {		
+				$field_args = $this->field_args_by_id[$input_name];
+			}
+
 			if ( isset( $field_args['validate']['regex'] ) ) {
 				$match_count = preg_match( $field_args['validate']['regex'], $input_value );
 
@@ -292,12 +296,12 @@ class PluginOptions {
 	private function validateFilter( $input_name, $input_value ) {
 		$is_valid = true;
 
-		$field_args = array();
-		if ( isset( $this->field_args_by_id[$input_name] ) ) {		
-			$field_args = $this->field_args_by_id[$input_name];
-		}
-
 		if ( !empty( $input_value ) ) {
+			$field_args = array();
+			if ( isset( $this->field_args_by_id[$input_name] ) ) {		
+				$field_args = $this->field_args_by_id[$input_name];
+			}
+
 			if ( isset( $field_args['validate']['filter'] ) ) {
 				if ( function_exists( 'filter_var' ) ) {
 					$filter_result = filter_var( $input_value, $field_args['validate']['filter'] );

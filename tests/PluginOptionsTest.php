@@ -2,8 +2,6 @@
 
 require 'class-plugin-options.php';
 
-/**
- */
 class PluginOptionsTest extends PHPUnit_Framework_TestCase {
 
 	public function testRenderTextField() {
@@ -165,6 +163,67 @@ class PluginOptionsTest extends PHPUnit_Framework_TestCase {
 		}	
 	}
 
+	public function testValidateFilter() {
+		$method = new ReflectionMethod( 'PluginOptions', 'validateFilter' );
+		$method->setAccessible( true );
+
+		$options = new PluginOptions();
+
+		$field_args = array(
+			'label'    => 'Test Field',
+			'name'     => 'a_field',
+			'validate' => array(
+				'filter'       => FILTER_VALIDATE_EMAIL,
+				'filter_error' => 'Invalid field.'
+			)
+		);
+
+		$options->setFieldArgsById( 'a_field', $field_args );
+
+		$this->assertFalse( $method->invoke($options, 'a_field', 'invalid_email' ) );
+		$this->assertTrue( $method->invoke($options, 'a_field', 'valid.email@localhost.localdomain' ) );
+	}
+
+	public function testValidateRegex() {
+		$method = new ReflectionMethod( 'PluginOptions', 'validateRegex' );
+		$method->setAccessible( true );
+
+		$options = new PluginOptions();
+
+		$field_args = array(
+			'label'    => 'Test Field',
+			'name'     => 'a_field',
+			'validate' => array(
+				'regex'       => '/^exact-match$/',
+				'regex_error' => 'Invalid field.'
+			)
+		);
+
+		$options->setFieldArgsById( 'a_field', $field_args );
+
+		$this->assertFalse( $method->invoke($options, 'a_field', 'not-an-exact-match' ) );
+		$this->assertTrue( $method->invoke($options, 'a_field', 'exact-match' ) );
+	}
+
+	public function testValidateRequired() {
+		$method = new ReflectionMethod( 'PluginOptions', 'validateRequired' );
+		$method->setAccessible( true );
+
+		$options = new PluginOptions();
+
+		$field_args = array(
+			'label'    => 'Test Field',
+			'name'     => 'a_field',
+			'validate' => array(
+				'required' => true
+			)
+		);
+
+		$this->assertFalse( $method->invoke($options, 'a_field', '', &$field_args ) );
+		$this->assertTrue( $method->invoke($options, 'a_field', 'a_value', &$field_args ) );
+	}
+
+
 	private function renderField( PluginOptions &$pluginOptions, array $field_args ) {
 		ob_start();
 
@@ -196,6 +255,13 @@ function get_option( $a ) {
  * Mock WP function.
  */
 function plugins_url() {
+
+}
+
+/**
+ * Mock WP function.
+ */
+function add_settings_error() {
 
 }
 
