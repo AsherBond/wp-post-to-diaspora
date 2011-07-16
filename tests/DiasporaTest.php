@@ -13,10 +13,10 @@ class DiasporaTest extends PHPUnit_Framework_TestCase {
 		// @todo handle posting a test message to a Diaspora instance
 	}
 
-	public function testSetHandle() {
+	public function testSetId() {
 		$diaspora = new Diaspora();
 
-		$diaspora->setHandle( 'test_user@test_server.com' );
+		$diaspora->setId( 'test_user@test_server.com' );
 		$this->assertAttributeEquals('test_user', 'username', $diaspora);
 		$this->assertAttributeEquals('test_server.com', 'server_domain', $diaspora);
 

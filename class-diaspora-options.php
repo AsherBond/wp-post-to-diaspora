@@ -35,13 +35,13 @@ class DiasporaOptions extends PluginOptions {
 
 		add_settings_section( 'diaspora_general', 'General', array( $this, 'renderSectionText' ), 'general' );
 
-		$this->field_args_by_id['handle'] = array(
-			'label'         => 'Diaspora Handle',
-			'name'          => 'handle',
+		$this->field_args_by_id['id'] = array(
+			'label'         => 'Diaspora ID',
+			'name'          => 'id',
 			'type'          => 'text',
 			'validate'      => array(
 				'filter'       => FILTER_VALIDATE_EMAIL,
-				'filter_error' => 'Enter a handle in the format of username@joindiaspora.com or another pod location if applicable.',
+				'filter_error' => 'Enter an ID in the format of username@joindiaspora.com or another pod location if applicable.',
 				'required'    => true
 			)
 		);

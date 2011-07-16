@@ -12,10 +12,10 @@ class Diaspora {
 	const WP_MESSAGE_PUBLISHED        = 6;
 
 	/**
-	 * Fully qualified handle in the form of username@server_domain
+	 * Fully qualified id in the form of username@server_domain
 	 * @var string
 	 */
-	private $handle;
+	private $id;
 
 	/**
 	 * Password to the username
@@ -58,14 +58,14 @@ class Diaspora {
 		add_filter( 'post_updated_messages', array( &$this, 'diasporaPostUpdatedMessages' ), 10, 1 );
 	}
 
-	public function setHandle( $handle ) {
-		$this->handle = $handle;
+	public function setId( $id ) {
+		$this->id = $id;
 
-		$handle_array = explode( '@', $handle, 2 );
+		$id_array = explode( '@', $id, 2 );
 
-		if ( count( $handle_array ) == 2 ) {	
-			$this->username = $handle_array[0];
-			$this->server_domain = $handle_array[1];
+		if ( count( $id_array ) == 2 ) {	
+			$this->username = $id_array[0];
+			$this->server_domain = $id_array[1];
 		}
 	}
 

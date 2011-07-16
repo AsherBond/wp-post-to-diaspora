@@ -15,7 +15,7 @@ require_once 'PHPUnit/Extensions/SeleniumTestCase.php';
  */
 class FunctionalTest extends PHPUnit_Extensions_SeleniumTestCase {
 
-	private $d_handle;
+	private $d_id;
 	private $d_username;
 	private $d_password;
 	private $d_protocol;
@@ -44,7 +44,7 @@ class FunctionalTest extends PHPUnit_Extensions_SeleniumTestCase {
 					$this->d_url       = (string) $site->url;
 
 					if ( count( preg_match( '@^(http|https)://([^/]+)@i', $this->d_url, $matches ) === 3 ) ) {
-						$this->d_handle    = $this->d_username . '@' . $matches[2];
+						$this->d_id    = $this->d_username . '@' . $matches[2];
 
 						if ( strcasecmp( $matches[1], 'http' ) === 0 ) {
 							$this->d_protocol  = 'http';
@@ -54,7 +54,7 @@ class FunctionalTest extends PHPUnit_Extensions_SeleniumTestCase {
 						}
 					}
 
-					if ( empty( $this->d_handle ) ) {
+					if ( empty( $this->d_id ) ) {
 						$this->fail( 'Diaspora url and/or username not set in application.xml' );
 					}
 
@@ -101,7 +101,7 @@ class FunctionalTest extends PHPUnit_Extensions_SeleniumTestCase {
 	public function testValidSettings() {
 		$this->loginAndBrowseToSettings();
 
-		$this->type('handle', 'test@joindiaspora.com');
+		$this->type('id', 'test@joindiaspora.com');
 		$this->type('password', 'some_password');
 		$this->check('protocol');
 		$this->select('url_shortener', 'Is.gd');
@@ -112,29 +112,29 @@ class FunctionalTest extends PHPUnit_Extensions_SeleniumTestCase {
 		$this->clickAndWait( 'link=Settings' );
 		$this->clickAndWait( 'link=WP Post To Diaspora' );
 
-		$this->assertElementValueEquals('handle', 'test@joindiaspora.com');
+		$this->assertElementValueEquals('id', 'test@joindiaspora.com');
 		$this->assertElementValueEquals('password', 'some_password');
 		$this->assertChecked('protocol');
 		$this->assertSelected('url_shortener', 'Is.gd');
 
-		$this->type('handle', 'test@subdomain.joindiaspora.com');
+		$this->type('id', 'test@subdomain.joindiaspora.com');
 		$this->clickAndWait( 'css=input[value="Save Changes"]' );
 		$this->assertElementContainsText('css=div#setting-error-settings_updated strong', 'Settings saved');
 	}
 
 	/**
-	 * Tests that a partial or empty handle generates an error.
+	 * Tests that a partial or empty id generates an error.
 	 */
-	public function testSettingsHandleErrors() {
+	public function testSettingsIdErrors() {
 		$this->loginAndBrowseToSettings();
 
-		$this->type('handle', 'test');
+		$this->type('id', 'test');
 		$this->clickAndWait( 'css=input[value="Save Changes"]' );
-		$this->assertElementPresent('css=div#setting-error-handle_error strong');
+		$this->assertElementPresent('css=div#setting-error-id_error strong');
 
-		$this->type('handle', '');
+		$this->type('id', '');
 		$this->clickAndWait( 'css=input[value="Save Changes"]' );
-		$this->assertElementPresent('css=div#setting-error-handle_error strong');
+		$this->assertElementPresent('css=div#setting-error-id_error strong');
 	}
 
 	/**
@@ -169,7 +169,7 @@ class FunctionalTest extends PHPUnit_Extensions_SeleniumTestCase {
 	public function testAddPostAndPublishToDiaspora() {
 		$this->loginAndBrowseToSettings();
 
-		$this->type('handle', $this->d_handle);
+		$this->type('id', $this->d_id);
 		$this->type('password', $this->d_password);
 
 		if ( ( $this->d_protocol == 'https' ) ) {
