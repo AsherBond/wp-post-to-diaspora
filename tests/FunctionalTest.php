@@ -102,7 +102,6 @@ class FunctionalTest extends PHPUnit_Extensions_SeleniumTestCase {
 		$this->loginAndBrowseToSettings();
 
 		$this->type('id', 'test@joindiaspora.com');
-		$this->type('password', 'some_password');
 		$this->check('protocol');
 		$this->select('url_shortener', 'Is.gd');
 		$this->clickAndWait( 'css=input[value="Save Changes"]' );
@@ -113,7 +112,6 @@ class FunctionalTest extends PHPUnit_Extensions_SeleniumTestCase {
 		$this->clickAndWait( 'link=WP Post To Diaspora' );
 
 		$this->assertElementValueEquals('id', 'test@joindiaspora.com');
-		$this->assertElementValueEquals('password', 'some_password');
 		$this->assertChecked('protocol');
 		$this->assertSelected('url_shortener', 'Is.gd');
 
@@ -138,17 +136,6 @@ class FunctionalTest extends PHPUnit_Extensions_SeleniumTestCase {
 	}
 
 	/**
-	 * Tests that a missing password generates an error.
-	 */
-	public function testSettingsPasswordError() {
-		$this->loginAndBrowseToSettings();
-
-		$this->type('password', '');
-		$this->clickAndWait( 'css=input[value="Save Changes"]' );
-		$this->assertElementPresent('css=div#setting-error-password_error strong');
-	}
-
-	/**
 	 * Tests that a missing password generates a warning on the
 	 * Posts -> Add page.
 	 *
@@ -170,7 +157,6 @@ class FunctionalTest extends PHPUnit_Extensions_SeleniumTestCase {
 		$this->loginAndBrowseToSettings();
 
 		$this->type('id', $this->d_id);
-		$this->type('password', $this->d_password);
 
 		if ( ( $this->d_protocol == 'https' ) ) {
 			$this->check('protocol');

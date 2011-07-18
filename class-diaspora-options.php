@@ -46,15 +46,6 @@ class DiasporaOptions extends PluginOptions {
 			)
 		);
 
-		$this->field_args_by_id['password'] = array(
-			'label'         => 'Diaspora Password',
-			'name'          => 'password',
-			'type'          => 'password',
-			'validate'      => array(
-				'required' => true
-			)
-		);
-
 		$this->field_args_by_id['protocol'] = array(
 			'default_value' => Diaspora::HTTPS,
 			'label'         => 'Connection Type',
