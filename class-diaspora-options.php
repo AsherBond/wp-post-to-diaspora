@@ -46,6 +46,16 @@ class DiasporaOptions extends PluginOptions {
 			)
 		);
 
+		// Temporary until OAuth2 is integrated
+		$this->field_args_by_id['access_token'] = array(
+			'label'         => 'Access Token',
+			'name'          => 'access_token',
+			'type'          => 'text',
+			'validate'      => array(
+				'required'    => true
+			)
+		);
+
 		$this->field_args_by_id['protocol'] = array(
 			'default_value' => Diaspora::HTTPS,
 			'label'         => 'Connection Type',

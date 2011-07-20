@@ -15,6 +15,7 @@ require_once 'PHPUnit/Extensions/SeleniumTestCase.php';
  */
 class FunctionalTest extends PHPUnit_Extensions_SeleniumTestCase {
 
+	private $d_access_token;
 	private $d_id;
 	private $d_username;
 	private $d_password;
@@ -34,11 +35,12 @@ class FunctionalTest extends PHPUnit_Extensions_SeleniumTestCase {
 		foreach ($config->sites->site as $site) {
 			switch ( $site['type'] ) {
 				case 'wordpress':
-					$this->wp_username = (string) $site->username;
-					$this->wp_password = (string) $site->password;
-					$this->wp_url      = (string) $site->url;
+					$this->wp_username     = (string) $site->username;
+					$this->wp_password     = (string) $site->password;
+					$this->wp_url          = (string) $site->url;
 					break;
 				case 'diaspora':
+					$this->d_access_token = (string) $site->access_token;
 					$this->d_username  = (string) $site->username;
 					$this->d_password  = (string) $site->password;
 					$this->d_url       = (string) $site->url;
@@ -102,6 +104,7 @@ class FunctionalTest extends PHPUnit_Extensions_SeleniumTestCase {
 		$this->loginAndBrowseToSettings();
 
 		$this->type('id', 'test@joindiaspora.com');
+		$this->type('access_token', '123456');
 		$this->check('protocol');
 		$this->select('url_shortener', 'Is.gd');
 		$this->clickAndWait( 'css=input[value="Save Changes"]' );
@@ -157,6 +160,7 @@ class FunctionalTest extends PHPUnit_Extensions_SeleniumTestCase {
 		$this->loginAndBrowseToSettings();
 
 		$this->type('id', $this->d_id);
+		$this->type('access_token', $this->d_access_token);
 
 		if ( ( $this->d_protocol == 'https' ) ) {
 			$this->check('protocol');
