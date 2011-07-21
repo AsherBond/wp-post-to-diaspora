@@ -18,11 +18,15 @@ At this point the plugin will not work until the as_note branch of Diaspora is m
 
 1.  Create a directory wp-post-to-diaspora in wp-content/plugins.  Upload the contents of this plugin
     into wp-content/plugins/wp-post-to-diaspora.
-2.  Navigate to Settings, Post to Diaspora.
-3.  At minimum fill in the Diaspora Handle and Password fields. (Note:  The password is stored in
-    plaintext.  The will become a non-issue once the oauth branch is merged in and integrated into
-    this plugin.)
-4.  Click Save Changes.
+2.  Download a copy of libdiaspora-php from https://github.com/untitaker/libdiaspora-php/archives/activity-streams.
+    Extract the file into a wp-content/plugins/wp-post-to-diaspora/libraries directory.  Rename the
+    untitaker-libdiaspora-php-<commit> directory so that it reads libdiaspora-php.
+    (As a todo item get the plugin to detect that the library is missing, download and extract it to the
+    correct location.)
+3.  Navigate to Settings, Post to Diaspora.
+4.  At minimum fill in the Diaspora ID and Access Token fields. (Note:  The WordPress needs to be
+    a pre-registered application to Diaspora.  It is unknown how to do that.)
+5.  Click Save Changes.
 
 == Frequently Asked Questions ==
 
