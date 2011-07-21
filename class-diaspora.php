@@ -24,10 +24,10 @@ class Diaspora {
 	private $password;
 
 	/**
-	 * Message to send to the server instance
-	 * @var string
+	 * Activity to send to the server instance
+	 * @var DiasporaStreams_Activity
 	 */
-	private $message;
+	private $activity;
 
 	/**
 	 * Domain name of the server
@@ -58,6 +58,10 @@ class Diaspora {
 		add_filter( 'post_updated_messages', array( &$this, 'diasporaPostUpdatedMessages' ), 10, 1 );
 	}
 
+	public function getHost() {
+		return $host = $this->protocol . '://' . $this->server_domain;
+	}
+
 	public function setId( $id ) {
 		$this->id = $id;
 
@@ -69,8 +73,8 @@ class Diaspora {
 		}
 	}
 
-	public function setMessage( $message ) {
-		$this->message = $message;
+	public function setActivity( $activity ) {
+		$this->activity = $activity;
 	}
 
 	public function setPassword( $password ) {
@@ -87,14 +91,13 @@ class Diaspora {
 	function postToDiaspora() {
 		$diaspora_status   = '';
 		$id                = get_the_ID();
-		$processed_message = $this->message;
 
 		if ( ( empty( $this->username ) ) || ( empty( $this->server_domain ) ) ) {
-			$diaspora_status = 'Error posting to Diaspora.  Please use your full Diaspora Handle in the form of username@server_name.com';
+			$diaspora_status = 'Error posting to Diaspora.  Please use your full Diaspora ID in the form of username@server_name.com';
 		}
 		else {
-			$json_array = array('auth_token' => $this->password, 'text' => $processed_message, 'format' => 'json');
-			$json_string = json_encode($json_array);
+			$json_string = json_encode($this->activity);
+
 			$host = $this->protocol . '://' . $this->server_domain . '/activity_streams/notes.json';
 
 			$resultArray = null;

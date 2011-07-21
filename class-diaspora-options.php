@@ -153,7 +153,7 @@ class DiasporaOptions extends PluginOptions {
 		echo '  <img alt="Diaspora" class="' . $img_class . '" id="diaspora" src="' . $this->plugin_uri . '/images/icons/diaspora-16x16.png" title="Diaspora" />';
 		echo '  <input type="hidden" name="' . $this->options_name . '_share_with[diaspora]" value="' . $share_with .'" />';
 
-		if ( ( empty( $options['handle']) ) || ( empty($options['password']) ) ) {
+		if ( ( empty( $options['id']) ) || ( empty($options['access_token']) ) ) {
 			echo '<p class="diaspora-warning">Attention: <a href="' . get_admin_url() . 'options-general.php?page=wp-post-to-diaspora">Configure before using.</a></p>';
 		}
 

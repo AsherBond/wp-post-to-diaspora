@@ -62,30 +62,58 @@
 				$options = get_option ( 'wp_post_to_diaspora_options' );
 				$urlShortener    = new UrlShortener();
 
-				$handle		= $options['handle'];
-				$pass		= $options['password'];
-				$protocol	= $options['protocol'];
-				$url_shortener  = $options['url_shortener'];
+				$id            = $options['id'];
+				$access_token  = $options['access_token'];
+				$protocol      = $options['protocol'];
+				$url_shortener = $options['url_shortener'];
 
-				$post = get_post ($postID);
+				$post = get_post($postID);
 				$str = '%s - %s';
 				$permalink = get_permalink($postID);
-
 				$shortened_url = $urlShortener->shorten( $url_shortener, $permalink );
-				if ($shortened_url !== false) {
-					$content = sprintf($str, $post->post_title, $shortened_url);
-				}
-				else {
-					$content = sprintf($str, $post->post_title, $permalink);
-				}
 
-				if ((!empty($handle))  && (!empty($pass))) {
+				//if ($shortened_url !== false) {
+				//	$content = sprintf($str, $post->post_title, $shortened_url);
+				//}
+				//else {
+					$content = sprintf($str, $post->post_title, $permalink);
+				//}
+
+				if ((!empty($id))  && (!empty($access_token))) {
+					require_once 'libraries/libdiaspora-php/load.php';
+
+					$activity = new DiasporaStreams_Activity(array(
+						'published' => strtotime($post->post_date),
+						'verb'      => 'post'
+					));
+
+					$actor = new DiasporaStreams_ActivityObject(array(
+						'url'         => get_the_author_meta('user_url', $post->post_author),
+						'displayName' => get_the_author_meta('display_name', $post->post_author)
+					));
+
+					$blog = new DiasporaStreams_ActivityObject(array(
+						'url'     => $permalink,
+						'content' => $content 
+					));
+
+					$activity->setActor($actor);
+					$activity->setObject($blog);
+
 					$diaspora = new Diaspora();
 
-					$diaspora->setHandle( $handle );
-					$diaspora->setPassword( $pass );
-					$diaspora->setMessage( $content );
+					$diaspora->setId( $id );
+					$diaspora->setPassword( $access_token );
 					$diaspora->setProtocol( $protocol );
+
+					$target = new DiasporaStreams_ActivityObject(array(
+						'objectType' => 'diaspora',
+						'url'        => $diaspora->getHost()
+					));
+
+					$activity->setTarget($target);
+
+					$diaspora->setActivity( $activity );
 
 					$diaspora->postToDiaspora();
 				} else {
