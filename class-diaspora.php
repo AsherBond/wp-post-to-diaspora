@@ -1,5 +1,7 @@
 <?php
 
+require_once 'libraries/libdiaspora-php/load.php';
+
 /**
  * Transmits a message from Wordpress to Diaspora.
  */
@@ -41,6 +43,8 @@ class Diaspora {
 	 */
 	private $username;
 
+	private $post_id;
+
 	private $protocol;
 
 	/**
@@ -58,6 +62,46 @@ class Diaspora {
 		add_filter( 'post_updated_messages', array( &$this, 'diasporaPostUpdatedMessages' ), 10, 1 );
 	}
 
+	private function createActivity() {
+		$post = get_post( $this->post_id );
+		$str = '%s - %s';
+		$permalink = get_permalink( $this->post_id );
+
+		$content = sprintf( $str, $post->post_title, $permalink );
+
+		$activity = new DiasporaStreams_Activity(array(
+			'published' => strtotime($post->post_date),
+			'verb'      => 'post'
+		));
+
+		$wordpress = new DiasporaStreams_ActivityObject(array(
+			'url'         => get_the_author_meta('user_url', $post->post_author),
+			'displayName' => get_the_author_meta('display_name', $post->post_author)
+		));
+
+		$blog = new DiasporaStreams_ActivityObject(array(
+			'url'     => $permalink,
+			'content' => $content
+		));
+
+		$activity->setActor( $wordpress );
+		$activity->setObject( $blog );
+
+		$diaspora = new Diaspora();
+
+		$diaspora->setId( $id );
+		$diaspora->setPassword( $access_token );
+		$diaspora->setProtocol( $protocol );
+
+		$target = new DiasporaStreams_ActivityObject(array(
+			'objectType' => 'diaspora',
+			'url'        => $this->getHost()
+		));
+
+		$activity->setTarget($target);
+		$this->activity = $activity;
+	}
+
 	public function getHost() {
 		return $host = $this->protocol . '://' . $this->server_domain;
 	}
@@ -73,12 +117,12 @@ class Diaspora {
 		}
 	}
 
-	public function setActivity( $activity ) {
-		$this->activity = $activity;
-	}
-
 	public function setPassword( $password ) {
 		$this->password = $password;
+	}
+
+	public function setPostId( $post_id ) {
+		$this->post_id = $post_id;
 	}
 
 	public function setProtocol( $protocol ) {
@@ -90,13 +134,14 @@ class Diaspora {
 	 */
 	function postToDiaspora() {
 		$diaspora_status   = '';
-		$id                = get_the_ID();
+		$id                = $this->post_id;
 
 		if ( ( empty( $this->username ) ) || ( empty( $this->server_domain ) ) ) {
 			$diaspora_status = 'Error posting to Diaspora.  Please use your full Diaspora ID in the form of username@server_name.com';
 		}
 		else {
-			$json_string = json_encode($this->activity);
+			$this->createActivity();
+			$json_string = $this->activity->encode();
 
 			$host = $this->protocol . '://' . $this->server_domain . '/activity_streams/notes.json';
 
