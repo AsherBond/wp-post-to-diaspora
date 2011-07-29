@@ -84,8 +84,8 @@ class Diaspora {
 			'content' => $content
 		));
 
-		$activity->setActor( $wordpress );
-		$activity->setObject( $blog );
+		$activity->actor = $wordpress;
+		$activity->object = $blog;
 
 		$diaspora = new Diaspora();
 
@@ -98,7 +98,7 @@ class Diaspora {
 			'url'        => $this->getHost()
 		));
 
-		$activity->setTarget($target);
+		$activity->target = $target;
 		$this->activity = $activity;
 	}
 
