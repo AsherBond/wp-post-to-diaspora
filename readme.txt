@@ -18,7 +18,7 @@ At this point the plugin will not work until the as_note branch of Diaspora is m
 
 1.  Create a directory wp-post-to-diaspora in wp-content/plugins.  Upload the contents of this plugin
     into wp-content/plugins/wp-post-to-diaspora.
-2.  Download a copy of libdiaspora-php from https://github.com/untitaker/libdiaspora-php/archives/activity-streams.
+2.  Download a copy of libdiaspora-php from https://github.com/untitaker/libdiaspora-php/archives/master.
     Extract the file into a wp-content/plugins/wp-post-to-diaspora/libraries directory.  Rename the
     untitaker-libdiaspora-php-<commit> directory so that it reads libdiaspora-php.
     (As a todo item get the plugin to detect that the library is missing, download and extract it to the
