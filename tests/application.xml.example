@@ -11,7 +11,8 @@
 			<url>http://diaspora.localdomain</url>
 			<username>a_username</username>
 			<password>a_password</password>
-			<access_token>my_access_token</access_token>
+			<oauth2_identifier>registered_id</oauth2_identifier>
+			<oauth2_secret>registered_secret</oauth2_secret>
 		</site>
 	</sites>
 </application>

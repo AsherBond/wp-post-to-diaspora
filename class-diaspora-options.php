@@ -47,9 +47,18 @@ class DiasporaOptions extends PluginOptions {
 		);
 
 		// Temporary until OAuth2 is integrated
-		$this->field_args_by_id['access_token'] = array(
-			'label'         => 'Access Token',
-			'name'          => 'access_token',
+		$this->field_args_by_id['oauth2_identifier'] = array(
+			'label'         => 'OAuth2 ID',
+			'name'          => 'oauth2_identifier',
+			'type'          => 'text',
+			'validate'      => array(
+				'required'    => true
+			)
+		);
+
+		$this->field_args_by_id['oauth2_secret'] = array(
+			'label'         => 'OAuth2 Secret',
+			'name'          => 'oauth2_secret',
 			'type'          => 'text',
 			'validate'      => array(
 				'required'    => true

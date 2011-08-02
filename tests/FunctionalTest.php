@@ -15,8 +15,9 @@ require_once 'PHPUnit/Extensions/SeleniumTestCase.php';
  */
 class FunctionalTest extends PHPUnit_Extensions_SeleniumTestCase {
 
-	private $d_access_token;
 	private $d_id;
+	private $d_oauth2_identifier;
+	private $d_oauth2_secret;
 	private $d_username;
 	private $d_password;
 	private $d_protocol;
@@ -40,10 +41,11 @@ class FunctionalTest extends PHPUnit_Extensions_SeleniumTestCase {
 					$this->wp_url          = (string) $site->url;
 					break;
 				case 'diaspora':
-					$this->d_access_token = (string) $site->access_token;
-					$this->d_username  = (string) $site->username;
-					$this->d_password  = (string) $site->password;
-					$this->d_url       = (string) $site->url;
+					$this->d_oauth2_identifier = (string) $site->oauth2_identifier;
+					$this->d_oauth2_secret     = (string) $site->oauth2_secret;
+					$this->d_username          = (string) $site->username;
+					$this->d_password          = (string) $site->password;
+					$this->d_url               = (string) $site->url;
 
 					if ( count( preg_match( '@^(http|https)://([^/]+)@i', $this->d_url, $matches ) === 3 ) ) {
 						$this->d_id    = $this->d_username . '@' . $matches[2];
@@ -104,7 +106,8 @@ class FunctionalTest extends PHPUnit_Extensions_SeleniumTestCase {
 		$this->loginAndBrowseToSettings();
 
 		$this->type('id', 'test@joindiaspora.com');
-		$this->type('access_token', '123456');
+		$this->type('oauth2_identifier', '123456');
+		$this->type('oauth2_secret', 'abcdef');
 		$this->check('protocol');
 		$this->select('url_shortener', 'Is.gd');
 		$this->clickAndWait( 'css=input[value="Save Changes"]' );
@@ -160,7 +163,8 @@ class FunctionalTest extends PHPUnit_Extensions_SeleniumTestCase {
 		$this->loginAndBrowseToSettings();
 
 		$this->type('id', $this->d_id);
-		$this->type('access_token', $this->d_access_token);
+		$this->type('oauth2_identifier', $this->d_oauth2_identifier);
+		$this->type('oauth2_secret', $this->d_oauth2_secret);
 
 		if ( ( $this->d_protocol == 'https' ) ) {
 			$this->check('protocol');
