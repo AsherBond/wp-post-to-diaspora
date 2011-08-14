@@ -22,16 +22,13 @@ class Diaspora {
 	private $id;
 
 	/**
-	 * Password to the username
-	 * @var string
-	 */
-	private $password;
-
-	/**
 	 * Activity to send to the server instance
 	 * @var DiasporaStreams_Activity
 	 */
 	private $activity;
+
+	private $oauth2_identifier;
+	private $oauth2_secret;
 
 	/**
 	 * Domain name of the server
@@ -119,8 +116,12 @@ class Diaspora {
 		}
 	}
 
-	public function setPassword( $password ) {
-		$this->password = $password;
+	public function setOauth2Identifier( $oauth2_identifier ) {
+		$this->oauth2_identifier = $oauth2_identifier;
+	}
+
+	public function setOauth2Secret( $oauth2_secret ) {
+		$this->oauth2_secret = $oauth2_secret;
 	}
 
 	public function setPort( $port ) {
@@ -147,7 +148,7 @@ class Diaspora {
 	/**
 	 * Sends a WordPress post to a Diaspora server.
 	 */
-	function postToDiaspora() {
+	public function postToDiaspora() {
 		$diaspora_status   = '';
 		$id                = $this->post_id;
 
@@ -158,7 +159,11 @@ class Diaspora {
 			$this->createActivity();
 			$json_string = $this->activity->encode();
 
-			$host = $this->protocol . '://' . $this->server_domain . '/activity_streams/notes.json';
+			$host  = $this->protocol . '://' . $this->server_domain;
+			if ( ( $this->port !== self::PORT_HTTP ) && ( $this->port !== self::PORT_HTTPS ) ) {
+				$host .= ':' . $this->port;
+			}
+			$host .= '/activity_streams/notes.json';
 
 			$resultArray = null;
 
@@ -170,15 +175,14 @@ class Diaspora {
 					CURLOPT_URL => $host,
 					CURLOPT_VERBOSE => 1,
 					CURLOPT_RETURNTRANSFER => 1,
-					//CURLOPT_USERPWD => "$username:$password",
 					CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-					CURKOPT_PORT => $this->port,
 					CURLOPT_POST => 1,
 					CURLOPT_HTTPHEADER => array('Content-type: application/json'),
 					CURLOPT_POSTFIELDS => $json_string
 				));
 
 				$result = curl_exec($ch);
+
 				if ($result !== false) {
 					$resultArray = curl_getinfo($ch);
 				}

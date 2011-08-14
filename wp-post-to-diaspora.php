@@ -62,10 +62,12 @@
 				$options = get_option ( 'wp_post_to_diaspora_options' );
 				//$urlShortener    = new UrlShortener();
 
-				$id            = $options['id'];
-				$access_token  = $options['access_token'];
-				$port          = $options['port'];
-				$protocol      = $options['protocol'];
+				$id                = $options['id'];
+				$access_token      = $options['access_token'];
+				$oauth2_identifier = $options['oauth2_identifier'];
+				$oauth2_secret     = $options['oauth2_secret'];
+				$port              = $options['port'];
+				$protocol          = $options['protocol'];
 				//$url_shortener = $options['url_shortener'];
 
 				//$shortened_url = $urlShortener->shorten( $url_shortener, $permalink );
@@ -77,11 +79,12 @@
 				//	$content = sprintf($str, $post->post_title, $permalink);
 				//}
 
-				if ((!empty($id))  && (!empty($access_token))) {
+				if ((!empty($id))  && (!empty($oauth2_secret))) {
 					$diaspora = new Diaspora();
 
 					$diaspora->setId( $id );
-					$diaspora->setPassword( $access_token );
+					$diaspora->setOauth2Identifier( $oauth2_identifier );
+					$diaspora->setOauth2Secret( $oauth2_secret );
 					$diaspora->setProtocol( $protocol );
 					$diaspora->setPort( $port );
 					$diaspora->setPostId( $post_id );
