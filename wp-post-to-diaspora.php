@@ -64,6 +64,7 @@
 
 				$id            = $options['id'];
 				$access_token  = $options['access_token'];
+				$port          = $options['port'];
 				$protocol      = $options['protocol'];
 				//$url_shortener = $options['url_shortener'];
 
@@ -82,6 +83,7 @@
 					$diaspora->setId( $id );
 					$diaspora->setPassword( $access_token );
 					$diaspora->setProtocol( $protocol );
+					$diaspora->setPort( $port );
 					$diaspora->setPostId( $post_id );
 
 					$diaspora->postToDiaspora();

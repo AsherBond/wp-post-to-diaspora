@@ -304,7 +304,11 @@ class PluginOptions {
 
 			if ( isset( $field_args['validate']['filter'] ) ) {
 				if ( function_exists( 'filter_var' ) ) {
-					$filter_result = filter_var( $input_value, $field_args['validate']['filter'] );
+					$filter_options = array();
+					if ( isset($field_args['validate']['filter_options']) ) {
+						$filter_options = array('options' => $field_args['validate']['filter_options']);
+					}
+					$filter_result = filter_var( $input_value, $field_args['validate']['filter'], $filter_options );
 
 					if ( $filter_result === false ) {
 						$is_valid = false;

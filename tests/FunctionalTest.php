@@ -20,6 +20,7 @@ class FunctionalTest extends PHPUnit_Extensions_SeleniumTestCase {
 	private $d_oauth2_secret;
 	private $d_username;
 	private $d_password;
+	private $d_port;
 	private $d_protocol;
 	private $d_url;
 
@@ -45,6 +46,7 @@ class FunctionalTest extends PHPUnit_Extensions_SeleniumTestCase {
 					$this->d_oauth2_secret     = (string) $site->oauth2_secret;
 					$this->d_username          = (string) $site->username;
 					$this->d_password          = (string) $site->password;
+					$this->d_port              = (string) $site->port;
 					$this->d_url               = (string) $site->url;
 
 					if ( count( preg_match( '@^(http|https)://([^/]+)@i', $this->d_url, $matches ) === 3 ) ) {
@@ -101,16 +103,19 @@ class FunctionalTest extends PHPUnit_Extensions_SeleniumTestCase {
 
 	/**
  	 * Tests that valid admin settings are successfully saved and stored.
+	 * @group current
 	 */
 	public function testValidSettings() {
 		$this->loginAndBrowseToSettings();
 
 		$this->type('id', 'test@joindiaspora.com');
+		$this->type('port', '');
 		$this->type('oauth2_identifier', '123456');
 		$this->type('oauth2_secret', 'abcdef');
 		$this->check('protocol');
 		$this->select('url_shortener', 'Is.gd');
 		$this->clickAndWait( 'css=input[value="Save Changes"]' );
+sleep(5);
 		$this->assertElementContainsText('css=div#setting-error-settings_updated strong', 'Settings saved');
 
 		$this->clickAndWait( 'link=Posts' );
@@ -124,6 +129,10 @@ class FunctionalTest extends PHPUnit_Extensions_SeleniumTestCase {
 		$this->type('id', 'test@subdomain.joindiaspora.com');
 		$this->clickAndWait( 'css=input[value="Save Changes"]' );
 		$this->assertElementContainsText('css=div#setting-error-settings_updated strong', 'Settings saved');
+
+		$this->type( 'port', '3000' );
+		$this->clickAndWait( 'css=input[value="Save Changes"]' );
+		$this->assertElementContainsText( 'css=div#setting-error-settings_updated strong', 'Settings saved' );
 	}
 
 	/**
@@ -139,6 +148,25 @@ class FunctionalTest extends PHPUnit_Extensions_SeleniumTestCase {
 		$this->type('id', '');
 		$this->clickAndWait( 'css=input[value="Save Changes"]' );
 		$this->assertElementPresent('css=div#setting-error-id_error strong');
+	}
+
+	/**
+	 * Tests for invalid port number settings.
+	 */
+	public function testSettingsPortErrors() {
+		$this->loginAndBrowseToSettings();
+
+		$this->type('port', '70000');
+		$this->clickAndWait( 'css=input[value="Save Changes"]' );
+		$this->assertElementPresent('css=div#setting-error-port_error strong');
+		
+		$this->type('port', 'Seventy thousand');
+		$this->clickAndWait( 'css=input[value="Save Changes"]' );
+		$this->assertElementPresent('css=div#setting-error-port_error strong');
+
+		$this->type('port', '-80');
+		$this->clickAndWait( 'css=input[value="Save Changes"]' );
+		$this->assertElementPresent('css=div#setting-error-port_error strong');
 	}
 
 	/**

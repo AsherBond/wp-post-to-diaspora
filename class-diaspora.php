@@ -7,8 +7,10 @@ require_once 'libraries/libdiaspora-php/load.php';
  */
 class Diaspora {
 
-	const HTTP  = 'http';
-	const HTTPS = 'https';
+	const HTTP       = 'http';
+	const HTTPS      = 'https';
+	const PORT_HTTP  = 80;
+	const PORT_HTTPS = 443;
 
 	const WP_MESSAGE_PUBLISHED_UPDATE = 1;
 	const WP_MESSAGE_PUBLISHED        = 6;
@@ -42,6 +44,12 @@ class Diaspora {
 	 * @var string
 	 */
 	private $username;
+
+	/**
+	 * Port number to connect to
+	 * @var int
+	 */
+	private $port;
 
 	private $post_id;
 
@@ -87,12 +95,6 @@ class Diaspora {
 		$activity->actor = $wordpress;
 		$activity->object = $blog;
 
-		$diaspora = new Diaspora();
-
-		$diaspora->setId( $id );
-		$diaspora->setPassword( $access_token );
-		$diaspora->setProtocol( $protocol );
-
 		$target = new DiasporaStreams_ActivityObject(array(
 			'objectType' => 'diaspora',
 			'url'        => $this->getHost()
@@ -121,12 +123,25 @@ class Diaspora {
 		$this->password = $password;
 	}
 
+	public function setPort( $port ) {
+		$this->port = $port;
+	}
+
 	public function setPostId( $post_id ) {
 		$this->post_id = $post_id;
 	}
 
 	public function setProtocol( $protocol ) {
 		$this->protocol = $protocol;
+
+		if (empty($this->port_number)) {
+			if ( $protocol === self::HTTPS ) {
+				$this->port_number = self::PORT_HTTPS;
+			}
+			else if ( $protocol === self::HTTP) {
+				$this->port_number = self::PORT_HTTP;
+			}
+		}
 	}
 
 	/**
@@ -157,6 +172,7 @@ class Diaspora {
 					CURLOPT_RETURNTRANSFER => 1,
 					//CURLOPT_USERPWD => "$username:$password",
 					CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+					CURKOPT_PORT => $this->port,
 					CURLOPT_POST => 1,
 					CURLOPT_HTTPHEADER => array('Content-type: application/json'),
 					CURLOPT_POSTFIELDS => $json_string

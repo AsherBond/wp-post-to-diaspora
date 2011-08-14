@@ -182,6 +182,24 @@ class PluginOptionsTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertFalse( $method->invoke($options, 'a_field', 'invalid_email' ) );
 		$this->assertTrue( $method->invoke($options, 'a_field', 'valid.email@localhost.localdomain' ) );
+
+		$options = new PluginOptions();
+
+		$field_args = array(
+			'label'    => 'Test Field',
+			'name'     => 'a_field',
+			'validate' => array(
+				'filter'       => FILTER_VALIDATE_INT,
+				'filter_error' => 'Invalid field.',
+				'filter_options' => array('min_range' => 1)
+			)
+		);
+
+		$options->setFieldArgsById( 'a_field', $field_args );
+		$this->assertFalse( $method->invoke($options, 'a_field', -1 ) );
+		$this->assertFalse( $method->invoke($options, 'a_field', 'invalid_int' ) );
+		$this->assertTrue( $method->invoke($options, 'a_field', 32 ) );
+		
 	}
 
 	public function testValidateRegex() {

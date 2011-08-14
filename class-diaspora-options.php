@@ -46,6 +46,18 @@ class DiasporaOptions extends PluginOptions {
 			)
 		);
 
+		$this->field_args_by_id['port'] = array(
+			'label'         => 'Diaspora Port (Optional)',
+			'name'          => 'port',
+			'type'          => 'text',
+			'validate'      => array(
+				'filter'         => FILTER_VALIDATE_INT,
+				'filter_options' => array('min_range' => 1,
+									      'max_range' => 65536),
+				'filter_error'   => 'Valid Diaspora Port ranges are from 1 to 65536.'
+			)
+		);
+
 		// Temporary until OAuth2 is integrated
 		$this->field_args_by_id['oauth2_identifier'] = array(
 			'label'         => 'OAuth2 ID',
@@ -162,7 +174,9 @@ class DiasporaOptions extends PluginOptions {
 		echo '  <img alt="Diaspora" class="' . $img_class . '" id="diaspora" src="' . $this->plugin_uri . '/images/icons/diaspora-16x16.png" title="Diaspora" />';
 		echo '  <input type="hidden" name="' . $this->options_name . '_share_with[diaspora]" value="' . $share_with .'" />';
 
-		if ( ( empty( $options['id']) ) || ( empty($options['access_token']) ) ) {
+		if ( ( empty( $options['id']) )
+			|| ( empty($options['oauth2_identifier'] ) )
+			|| ( empty($options['oauth2_secret'] ) ) ) {
 			echo '<p class="diaspora-warning">Attention: <a href="' . get_admin_url() . 'options-general.php?page=wp-post-to-diaspora">Configure before using.</a></p>';
 		}
 
