@@ -87,7 +87,7 @@
 					$diaspora->setOauth2Secret( $oauth2_secret );
 					$diaspora->setProtocol( $protocol );
 					$diaspora->setPort( $port );
-					$diaspora->setPostId( $post_id );
+					$diaspora->setPostId( $postID );
 
 					$diaspora->postToDiaspora();
 				} else {

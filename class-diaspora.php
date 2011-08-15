@@ -178,7 +178,8 @@ class Diaspora {
 					CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
 					CURLOPT_POST => 1,
 					CURLOPT_HTTPHEADER => array('Content-type: application/json'),
-					CURLOPT_POSTFIELDS => $json_string
+					CURLOPT_POSTFIELDS => $json_string,
+					CURLOPT_USERPWD => base64_encode( $this->oauth2_identifier . ':' . $this->oauth2_secret )
 				));
 
 				$result = curl_exec($ch);
