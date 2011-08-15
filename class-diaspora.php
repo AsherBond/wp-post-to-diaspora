@@ -99,6 +99,7 @@ class Diaspora {
 
 		$activity->target = $target;
 		$this->activity = $activity;
+		$this->activity->validate();
 	}
 
 	public function getHost() {
@@ -152,11 +153,15 @@ class Diaspora {
 		$diaspora_status   = '';
 		$id                = $this->post_id;
 
+		$this->createActivity();
+
 		if ( ( empty( $this->username ) ) || ( empty( $this->server_domain ) ) ) {
 			$diaspora_status = 'Error posting to Diaspora.  Please use your full Diaspora ID in the form of username@server_name.com';
 		}
+		else if ( $this->activity->getLastError() ) {
+			$diaspora_status = 'Error creating Diaspora activity.  ' . $this->activity->getLastError();
+		}
 		else {
-			$this->createActivity();
 			$json_string = $this->activity->encode();
 
 			$host  = $this->protocol . '://' . $this->server_domain;
