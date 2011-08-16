@@ -67,34 +67,43 @@ class Diaspora {
 		add_filter( 'post_updated_messages', array( &$this, 'diasporaPostUpdatedMessages' ), 10, 1 );
 	}
 
+	/**
+	 * @todo Add avatar MediaLink to $author.
+	 * @todo Append shortened link to $blog->displayName 
+	 */
 	private function createActivity() {
-		$post = get_post( $this->post_id );
-		$str = '%s - %s';
-		$permalink = get_permalink( $this->post_id );
-
-		$content = sprintf( $str, $post->post_title, $permalink );
+		$post             = get_post( $this->post_id );
+		$post_date_ts     = strtotime( $post->post_date );
+		$permalink        = get_permalink( $this->post_id );
+		$activity_blog_id = 'tag:' . preg_replace( '/(http|https):\/\//i', '', get_home_url() )
+		                    . ',' . date( 'Y', $post_date_ts );
 
 		$activity = new DiasporaStreams_Activity(array(
-			'published' => strtotime($post->post_date),
+			'published' => $post_date_ts,
 			'verb'      => 'post'
 		));
 
-		$wordpress = new DiasporaStreams_ActivityObject(array(
-			'url'         => get_the_author_meta('user_url', $post->post_author),
-			'displayName' => get_the_author_meta('display_name', $post->post_author)
+		$author = new DiasporaStreams_ActivityObject(array(
+			'url'         => get_the_author_meta( 'user_url', $post->post_author ),
+			'displayName' => get_the_author_meta( 'display_name', $post->post_author )
 		));
 
 		$blog = new DiasporaStreams_ActivityObject(array(
-			'url'     => $permalink,
-			'content' => $content
+			'content'     => $post->post_content,
+			'displayName' => $post->post_title,
+			'id'          => $activity_blog_id . ':' . $permalink,
+			'objectType'  => 'article',
+			'url'         => $permalink
 		));
 
-		$activity->actor = $wordpress;
+		$activity->actor  = $author;
 		$activity->object = $blog;
 
 		$target = new DiasporaStreams_ActivityObject(array(
-			'objectType' => 'diaspora',
-			'url'        => $this->getHost()
+			'displayName' => get_bloginfo( 'name' ),
+			'id'          => $activity_blog_id . ':blog',
+			'objectType'  => 'blog',
+			'url'         => get_home_url()
 		));
 
 		$activity->target = $target;
@@ -153,61 +162,63 @@ class Diaspora {
 		$diaspora_status   = '';
 		$id                = $this->post_id;
 
-		$this->createActivity();
-
 		if ( ( empty( $this->username ) ) || ( empty( $this->server_domain ) ) ) {
 			$diaspora_status = 'Error posting to Diaspora.  Please use your full Diaspora ID in the form of username@server_name.com';
 		}
-		else if ( $this->activity->getLastError() ) {
-			$diaspora_status = 'Error creating Diaspora activity.  ' . $this->activity->getLastError();
-		}
 		else {
-			$json_string = $this->activity->encode();
+			$this->createActivity();
 
-			$host  = $this->protocol . '://' . $this->server_domain;
-			if ( ( $this->port !== self::PORT_HTTP ) && ( $this->port !== self::PORT_HTTPS ) ) {
-				$host .= ':' . $this->port;
-			}
-			$host .= '/activity_streams/notes.json';
-
-			$resultArray = null;
-
-			$ch = curl_init();
-
-			if ($ch !== false) {
-				curl_setopt_array($ch, array(
-					CURLOPT_CONNECTTIMEOUT => 30,
-					CURLOPT_URL => $host,
-					CURLOPT_VERBOSE => 1,
-					CURLOPT_RETURNTRANSFER => 1,
-					CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-					CURLOPT_POST => 1,
-					CURLOPT_HTTPHEADER => array('Content-type: application/json'),
-					CURLOPT_POSTFIELDS => $json_string,
-					CURLOPT_USERPWD => base64_encode( $this->oauth2_identifier . ':' . $this->oauth2_secret )
-				));
-
-				$result = curl_exec($ch);
-
-				if ($result !== false) {
-					$resultArray = curl_getinfo($ch);
-				}
-				else {
-					$diaspora_status = 'Error posting to Diaspora. Error Code: ' . curl_error($ch);
-				}
-
-				curl_close($ch);
+			if ( $this->activity->getLastError() ) {
+				$diaspora_status = 'Error creating Diaspora activity.  ' . $this->activity->getLastError();
 			}
 			else {
-				$diaspora_status = 'Error creating a cURL resource.';
-			}
+				$json_string = $this->activity->encode();
 
-			if (is_array($resultArray)) {
-				if ($resultArray['http_code'] == "200") {
-					$diaspora_status = 'Posted to Diaspora successfully.';
+				$host  = $this->protocol . '://' . $this->server_domain;
+				if ( ( $this->port !== self::PORT_HTTP ) && ( $this->port !== self::PORT_HTTPS ) ) {
+					$host .= ':' . $this->port;
+				}
+				$host .= '/activity_streams/notes.json';
+
+				$resultArray = null;
+
+				$ch = curl_init();
+
+				if ($ch !== false) {
+					curl_setopt_array($ch, array(
+						CURLOPT_CONNECTTIMEOUT => 30,
+						CURLOPT_URL => $host,
+						CURLOPT_VERBOSE => 1,
+						CURLOPT_RETURNTRANSFER => 1,
+						CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+						CURLOPT_POST => 1,
+						CURLOPT_HTTPHEADER => array('Content-type: application/json'),
+						CURLOPT_POSTFIELDS => $json_string,
+						CURLOPT_USERPWD => base64_encode( $this->oauth2_identifier . ':' . $this->oauth2_secret )
+					));
+
+					$result = curl_exec($ch);
+
+					if ($result !== false) {
+						$resultArray = curl_getinfo($ch);
+					}
+					else {
+						$diaspora_status = 'Error posting to Diaspora. Error Code: ' . curl_error($ch);
+					}
+
+					curl_close($ch);
 				}
 				else {
-					$diaspora_status = "Error posting to Diaspora. Retry Code: {$resultArray['http_code']}";
+					$diaspora_status = 'Error creating a cURL resource.';
+				}
+
+				if (is_array($resultArray)) {
+					if ($resultArray['http_code'] == "200") {
+						$diaspora_status = 'Posted to Diaspora successfully.';
+					}
+					else {
+						$diaspora_status = "Error posting to Diaspora. Retry Code: {$resultArray['http_code']}";
+					}
 				}
 			}
 		}

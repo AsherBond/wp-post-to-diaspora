@@ -193,6 +193,7 @@ sleep(5);
 		$this->type('id', $this->d_id);
 		$this->type('oauth2_identifier', $this->d_oauth2_identifier);
 		$this->type('oauth2_secret', $this->d_oauth2_secret);
+		$this->type('port', $this->d_port);
 
 		if ( ( $this->d_protocol == 'https' ) ) {
 			$this->check('protocol');
