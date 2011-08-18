@@ -12,6 +12,7 @@ class Diaspora {
 	const PORT_HTTP  = 80;
 	const PORT_HTTPS = 443;
 
+	const WP_AVATAR_SIZE              = 50;
 	const WP_MESSAGE_PUBLISHED_UPDATE = 1;
 	const WP_MESSAGE_PUBLISHED        = 6;
 
@@ -72,20 +73,39 @@ class Diaspora {
 	 * @todo Append shortened link to $blog->displayName 
 	 */
 	private function createActivity() {
+		$author_avatar    = null;
+		$matches          = array();
 		$post             = get_post( $this->post_id );
 		$post_date_ts     = strtotime( $post->post_date );
 		$permalink        = get_permalink( $this->post_id );
 		$activity_blog_id = 'tag:' . preg_replace( '/(http|https):\/\//i', '', get_home_url() )
 		                    . ',' . date( 'Y', $post_date_ts );
 
+		$avatar_img_html = get_avatar( get_the_author_meta('user_email'), self::WP_AVATAR_SIZE );
+		$avatar_img_url  = '';
+
+		preg_match( "/src='([^']+)'/", $avatar_img_html, $matches );
+		if ( isset( $matches[1] ) ) {
+			$avatar_img_url = $matches[1];
+		}
+
 		$activity = new DiasporaStreams_Activity(array(
 			'published' => $post_date_ts,
 			'verb'      => 'post'
 		));
 
+		if ( !empty($avatar_img_url) ) {
+			$author_avatar = new DiasporaStreams_MediaLink(array(
+				'height' => self::WP_AVATAR_SIZE,
+				'width'  => self::WP_AVATAR_SIZE,
+				'url'    => $avatar_img_url
+			));
+		}
+
 		$author = new DiasporaStreams_ActivityObject(array(
 			'url'         => get_the_author_meta( 'user_url', $post->post_author ),
-			'displayName' => get_the_author_meta( 'display_name', $post->post_author )
+			'displayName' => get_the_author_meta( 'display_name', $post->post_author ),
+			'image'       => $author_avatar
 		));
 
 		$blog = new DiasporaStreams_ActivityObject(array(
