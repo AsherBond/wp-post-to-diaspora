@@ -219,11 +219,18 @@ class Diaspora {
 
 					$result = curl_exec($ch);
 
+					$log_file = '/tmp/wp.log';
+
+					error_log("Posting to URL: $host\n", 3, $log_file);
+					error_log("Sending activity: $json_string\n", 3, $log_file);
+
 					if ($result !== false) {
 						$resultArray = curl_getinfo($ch);
+						error_log("Server response: " . print_r($resultArray, true) . "\n\n", 3, $log_file);
 					}
 					else {
 						$diaspora_status = 'Error posting to Diaspora. Error Code: ' . curl_error($ch);
+						error_log("Server error: " . curl_error($ch) . "\n\n", 3, $log_file);
 					}
 
 					curl_close($ch);
