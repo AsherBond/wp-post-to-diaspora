@@ -165,12 +165,12 @@ class Diaspora {
 	public function setProtocol( $protocol ) {
 		$this->protocol = $protocol;
 
-		if (empty($this->port_number)) {
+		if (empty($this->port)) {
 			if ( $protocol === self::HTTPS ) {
-				$this->port_number = self::PORT_HTTPS;
+				$this->port = self::PORT_HTTPS;
 			}
 			else if ( $protocol === self::HTTP) {
-				$this->port_number = self::PORT_HTTP;
+				$this->port = self::PORT_HTTP;
 			}
 		}
 	}
@@ -195,7 +195,7 @@ class Diaspora {
 				$json_string = $this->activity->encode();
 
 				$host  = $this->protocol . '://' . $this->server_domain;
-				if ( ( $this->port !== self::PORT_HTTP ) && ( $this->port !== self::PORT_HTTPS ) ) {
+				if ( ( $this->port !== self::PORT_HTTP ) && ( $this->port !== self::PORT_HTTPS ) && ( !empty( $this->port ) ) ) {
 					$host .= ':' . $this->port;
 				}
 				$host .= '/activity_streams/notes.json';
