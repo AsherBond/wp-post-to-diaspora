@@ -255,32 +255,4 @@ class PluginOptionsTest extends PHPUnit_Framework_TestCase {
 
 }
 
-/**
- * Mock WP function.
- */
-function add_action( $a, $b ) {
-
-}
-
-/**
- * Mock WP function.
- */
-function get_option( $a ) {
-	return array();
-}
-
-/**
- * Mock WP function.
- */
-function plugins_url() {
-
-}
-
-/**
- * Mock WP function.
- */
-function add_settings_error() {
-
-}
-
 ?>
