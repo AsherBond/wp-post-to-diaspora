@@ -1,5 +1,6 @@
 <?php
 
+require_once 'class-logger.php';
 require_once 'libraries/libdiaspora-php/load.php';
 
 /**
@@ -66,6 +67,10 @@ class Diaspora {
 		$this->protocol = self::HTTPS;
 
 		add_filter( 'post_updated_messages', array( &$this, 'diasporaPostUpdatedMessages' ), 10, 1 );
+
+		$this->logger = Logger::getInstance();
+		$this->logger->setFileName( '/tmp/wp-post-to-diaspora.log' );
+		$this->logger->setLevel( Logger::DEBUG );
 	}
 
 	/**
@@ -219,18 +224,16 @@ class Diaspora {
 
 					$result = curl_exec($ch);
 
-					$log_file = '/tmp/wp.log';
-
-					error_log("Posting to URL: $host\n", 3, $log_file);
-					error_log("Sending activity: $json_string\n", 3, $log_file);
+					$this->logger->log( "Posting to URL: $host" );
+					$this->logger->log( "Sending activity: $json_string" );
 
 					if ($result !== false) {
 						$resultArray = curl_getinfo($ch);
-						error_log("Server response: " . print_r($resultArray, true) . "\n\n", 3, $log_file);
+						$this->logger->log( "Server response: " . print_r($resultArray, true) );
 					}
 					else {
 						$diaspora_status = 'Error posting to Diaspora. Error Code: ' . curl_error($ch);
-						error_log("Server error: " . curl_error($ch) . "\n\n", 3, $log_file);
+						$this->logger->log( "Server error: " . curl_error($ch), Logger::ERROR );
 					}
 
 					curl_close($ch);
