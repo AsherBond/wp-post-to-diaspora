@@ -74,7 +74,28 @@ class Diaspora {
 	}
 
 	/**
-	 * @todo Add avatar MediaLink to $author.
+	 * Attempt an OAuth2 authorization grant to the Diaspora server.
+	 * This does not work for some reason.
+	 *
+	 */
+	public function authorizationRequest() {
+		$host = $this->getHost();
+
+		if ( $this->isActiveUrl( $host ) ) {
+			$credentials = array('key'    => $this->oauth2_identifier,
+								 'secret' => $this->oauth2_secret);
+
+			$app   = new DiasporaApplication( 'WP Post To Diaspora', $host, $credentials );
+			$oauth = new DiasporaOauth( $app );
+
+			$oauth->authorize();
+		}
+		else {
+			add_settings_error( 'id', 'id', 'Could not establish a connection to ' . $host . '.' );	
+		}
+	}
+
+	/**
 	 * @todo Append shortened link to $blog->displayName 
 	 */
 	private function createActivity() {
@@ -137,7 +158,34 @@ class Diaspora {
 	}
 
 	public function getHost() {
-		return $host = $this->protocol . '://' . $this->server_domain;
+		$host = $this->protocol . '://' . $this->server_domain;
+
+		if ( ( $this->port !== self::PORT_HTTP ) && ( $this->port !== self::PORT_HTTPS ) && ( !empty( $this->port ) ) ) {
+			$host .= ':' . $this->port;
+		}
+
+		return $host;
+	}
+
+	/**
+	 * Determines if a connect can be established for a given URL.
+	 * @param string $url The URL to connect to.
+	 * @return bool True if a connect is made, false if not.
+	 */
+	private function isActiveUrl( $url ) {
+		$ch        = curl_init();
+		$is_active = true;
+
+		if ( $ch !== false ) {
+			curl_setopt($ch, CURLOPT_URL, $url);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+			$is_active = curl_exec( $ch );
+
+			curl_close( $ch );
+		}
+
+		return $is_active;
 	}
 
 	public function setId( $id ) {
@@ -199,11 +247,7 @@ class Diaspora {
 			else {
 				$json_string = $this->activity->encode();
 
-				$host  = $this->protocol . '://' . $this->server_domain;
-				if ( ( $this->port !== self::PORT_HTTP ) && ( $this->port !== self::PORT_HTTPS ) && ( !empty( $this->port ) ) ) {
-					$host .= ':' . $this->port;
-				}
-				$host .= '/activity_streams/notes.json';
+				$activity_url  = $this->getHost() . '/activity_streams/notes.json';
 
 				$resultArray = null;
 
@@ -212,7 +256,7 @@ class Diaspora {
 				if ($ch !== false) {
 					curl_setopt_array($ch, array(
 						CURLOPT_CONNECTTIMEOUT => 30,
-						CURLOPT_URL => $host,
+						CURLOPT_URL => $activity_url,
 						CURLOPT_VERBOSE => 1,
 						CURLOPT_RETURNTRANSFER => 1,
 						CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,

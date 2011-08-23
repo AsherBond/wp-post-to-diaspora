@@ -28,7 +28,7 @@ class DiasporaOptions extends PluginOptions {
 	/**
 	 * Creates and registers field arguments that are displayed on the settings page.
 	 */
-        public function initialize() {
+	public function initialize() {
 		parent::initialize();
 
 		register_setting( $this->options_name, $this->options_name, array( &$this, 'validate' ) );
@@ -115,7 +115,40 @@ class DiasporaOptions extends PluginOptions {
 
 		add_action( 'post_submitbox_misc_actions', array( &$this, 'postMiscOptions' ) );
 		add_filter( 'redirect_post_location', array( &$this, 'redirectPost' ), 10, 2 );
-        }
+
+		$this->renderConnectLink();
+	}
+
+	private function renderConnectLink() {
+		$options = get_option( $this->options_name );
+
+		if ( ( !empty($options['id'] ) )
+			&& ( empty( $options['access_token'] ) ) 
+			&& ( isset( $_GET['page'] ) )
+			&& ( $_GET['page'] == $this->uid ) ) {
+
+			$msg = 'Connect with your Diaspora server by clicking <a href="?page=' . $this->uid . '&auth-request">here</a>.';
+
+			if ( isset($_GET['error'] ) ) {
+				$msg .= ' Error: ' . $_GET['error'];
+			}
+
+			add_settings_error( 'id', 'id', $msg );
+		}
+
+		//@todo put this in a better location
+		if ( isset( $_GET['auth-request'] ) ) {
+			$diaspora = new Diaspora();
+
+			$diaspora->setId( $options['id'] );
+			$diaspora->setOauth2Identifier( $options['oauth2_identifier'] );
+			$diaspora->setOauth2Secret( $options['oauth2_secret'] );
+			$diaspora->setPort( $options['port'] );
+			$diaspora->setProtocol( $options['protocol'] );
+
+			$diaspora->authorizationRequest();			
+		}
+	}
 
 	/**
 	 * Displays a brief description on the settings page.
