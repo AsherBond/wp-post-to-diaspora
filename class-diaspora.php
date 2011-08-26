@@ -88,6 +88,8 @@ class Diaspora {
 			$app   = new DiasporaApplication( 'WP Post To Diaspora', $host, $credentials );
 			$oauth = new DiasporaOauth( $app );
 
+			$oauth->_scope = 'limited';
+
 			$oauth->authorize();
 		}
 		else {
