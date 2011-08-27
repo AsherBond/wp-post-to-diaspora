@@ -29,6 +29,7 @@ class Diaspora {
 	 */
 	private $activity;
 
+	private $oauth2_access_token;
 	private $oauth2_authorization_grant;
 	private $oauth2_identifier;
 	private $oauth2_secret;
@@ -235,6 +236,10 @@ class Diaspora {
 		}
 	}
 
+	public function setOauth2AccessToken( $oauth2_access_token ) {
+		$this->oauth2_access_token = $oauth2_access_token;
+	}
+
 	public function setOauth2AuthorizationGrant( $oauth2_authorization_grant ) {
 		$this->oauth2_authorization_grant = $oauth2_authorization_grant;
 	}
@@ -301,9 +306,11 @@ class Diaspora {
 						CURLOPT_RETURNTRANSFER => 1,
 						CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
 						CURLOPT_POST => 1,
-						CURLOPT_HTTPHEADER => array('Content-type: application/json'),
+						CURLOPT_HTTPHEADER => array(
+							'Content-type: application/json',
+							'Authorization: OAuth ' . $this->access_token
+						),
 						CURLOPT_POSTFIELDS => $json_string,
-						CURLOPT_USERPWD => base64_encode( $this->oauth2_identifier . ':' . $this->oauth2_secret )
 					));
 
 					$result = curl_exec($ch);
