@@ -29,6 +29,7 @@ class Diaspora {
 	 */
 	private $activity;
 
+	private $oauth2_authorization_grant;
 	private $oauth2_identifier;
 	private $oauth2_secret;
 
@@ -74,9 +75,41 @@ class Diaspora {
 	}
 
 	/**
-	 * Attempt an OAuth2 authorization grant to the Diaspora server.
-	 * This does not work for some reason.
-	 *
+	 * Make an access token request to the Diaspora server.
+	 */
+	public function getToken() {
+		$host  = $this->getHost();
+		$token = null;
+
+		$credentials = array('key'    => $this->oauth2_identifier,
+							 'secret' => $this->oauth2_secret);
+
+		$app   = new DiasporaApplication( 'WP Post To Diaspora', $host, $credentials );
+		$oauth = new DiasporaOauth( $app );
+
+		$oauth->_scope = 'limited';
+
+		// Diaspora requires the callback uri used in the initial authorization
+		// grant request.  Remove the return code.
+		$redirect_uri = DiasporaUtils::currentURI();
+		$redirect_uri = preg_replace( '/&?code=[^&]*/', '', $redirect_uri );
+
+		try {
+			$this->logger->log( "Retrieving oauth2 tokens using redirect_uri of $redirect_uri." );
+
+			$token = $oauth->getAccessToken( $_GET['code'], $redirect_uri );
+
+			$this->logger->log( "Token is " . print_r($token, true) );
+		}
+		catch (DiasporaException $e) {
+			add_settings_error( 'id', 'id', $e->message );
+		}
+
+		return $token;
+	}
+
+	/**
+	 * Make an OAuth2 authorization grant to the Diaspora server.
 	 */
 	public function authorizationRequest() {
 		$host = $this->getHost();
@@ -90,6 +123,7 @@ class Diaspora {
 
 			$oauth->_scope = 'limited';
 
+			$this->logger->log( "Sending oauth2 request." );
 			$oauth->authorize();
 		}
 		else {
@@ -199,6 +233,10 @@ class Diaspora {
 			$this->username = $id_array[0];
 			$this->server_domain = $id_array[1];
 		}
+	}
+
+	public function setOauth2AuthorizationGrant( $oauth2_authorization_grant ) {
+		$this->oauth2_authorization_grant = $oauth2_authorization_grant;
 	}
 
 	public function setOauth2Identifier( $oauth2_identifier ) {

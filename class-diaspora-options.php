@@ -1,7 +1,7 @@
 <?php
 
-require_once 'class-plugin-options.php';
 require_once 'class-diaspora.php';
+require_once 'class-plugin-options.php';
 
 /**
  * Registers, validates and displays options on the Post to Diaspora settings page.
@@ -116,14 +116,48 @@ class DiasporaOptions extends PluginOptions {
 		add_action( 'post_submitbox_misc_actions', array( &$this, 'postMiscOptions' ) );
 		add_filter( 'redirect_post_location', array( &$this, 'redirectPost' ), 10, 2 );
 
+		if  ( ( isset($_GET['auth-request']) ) || ( isset( $_GET['authorize'] ) ) ) {
+			$this->connectToDiaspora();
+		}
+
 		$this->renderConnectLink();
+	}
+
+	private function connectToDiaspora() {
+		$options = get_option( $this->options_name );
+
+		$diaspora = new Diaspora();
+		$diaspora->setId( $options['id'] );
+		$diaspora->setOauth2Identifier( $options['oauth2_identifier'] );
+		$diaspora->setOauth2Secret( $options['oauth2_secret'] );
+		$diaspora->setPort( $options['port'] );
+		$diaspora->setProtocol( $options['protocol'] );
+
+		if ( !isset( $_GET['authorize'] ) ) {
+			$diaspora->authorizationRequest();			
+		}
+		else if ( ( isset( $_GET['code'] ) ) && ( !empty( $_GET['code'] ) ) ) {
+			$authorization_grant = $_GET['code'];
+
+			$diaspora->setOauth2AuthorizationGrant( $authorization_grant );
+			$token = $diaspora->getToken();
+
+			if ( $token !== null ) {
+				$options['oauth2_access_token']  = $token->accessToken;
+				$options['oauth2_refresh_token'] = $token->refreshToken;
+				$options['oauth2_lifetime']      = $token->lifeTime;
+
+				update_option( $this->options_name, $options );
+			}
+
+		}
 	}
 
 	private function renderConnectLink() {
 		$options = get_option( $this->options_name );
 
 		if ( ( !empty($options['id'] ) )
-			&& ( empty( $options['access_token'] ) ) 
+			&& ( empty( $options['oauth2_access_token'] ) ) 
 			&& ( isset( $_GET['page'] ) )
 			&& ( $_GET['page'] == $this->uid ) ) {
 
@@ -136,18 +170,6 @@ class DiasporaOptions extends PluginOptions {
 			add_settings_error( 'id', 'id', $msg );
 		}
 
-		//@todo put this in a better location
-		if ( isset( $_GET['auth-request'] ) ) {
-			$diaspora = new Diaspora();
-
-			$diaspora->setId( $options['id'] );
-			$diaspora->setOauth2Identifier( $options['oauth2_identifier'] );
-			$diaspora->setOauth2Secret( $options['oauth2_secret'] );
-			$diaspora->setPort( $options['port'] );
-			$diaspora->setProtocol( $options['protocol'] );
-
-			$diaspora->authorizationRequest();			
-		}
 	}
 
 	/**
