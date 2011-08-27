@@ -113,6 +113,7 @@ class DiasporaOptions extends PluginOptions {
 			}
 		}
 
+		add_action( 'all_admin_notices', array( &$this, 'renderConnectLink' ) );
 		add_action( 'post_submitbox_misc_actions', array( &$this, 'postMiscOptions' ) );
 		add_action( 'update_option', array( &$this, 'updateOption' ), 10, 3 );
 		add_filter( 'redirect_post_location', array( &$this, 'redirectPost' ), 10, 2 );
@@ -120,8 +121,6 @@ class DiasporaOptions extends PluginOptions {
 		if  ( ( isset($_GET['auth-request']) ) || ( isset( $_GET['authorize'] ) ) ) {
 			$this->connectToDiaspora();
 		}
-
-		$this->renderConnectLink();
 	}
 
 	private function connectToDiaspora() {
@@ -154,10 +153,12 @@ class DiasporaOptions extends PluginOptions {
 		}
 	}
 
-	private function renderConnectLink() {
+	public function renderConnectLink() {
 		$options = get_option( $this->options_name );
 
 		if ( ( !empty($options['id'] ) )
+			&& ( !empty($options['oauth2_identifier'] ) ) 
+			&& ( !empty($options['oauth2_secret'] ) ) 
 			&& ( empty( $options['oauth2_access_token'] ) ) 
 			&& ( isset( $_GET['page'] ) )
 			&& ( $_GET['page'] == $this->uid ) ) {
@@ -168,9 +169,25 @@ class DiasporaOptions extends PluginOptions {
 				$msg .= ' Error: ' . $_GET['error'];
 			}
 
-			add_settings_error( 'id', 'id', $msg );
-		}
+			$saved_errors = get_transient( 'settings_errors' );
 
+			if ( ( !empty($saved_errors) ) && ( is_array($saved_errors) ) ) {
+
+				// Locate the 'Settings saved.' message that appears during a postback call and append
+				// the connect message to it.
+				foreach ( $saved_errors as $index=> $saved_error ) {
+					if ( $saved_error['code'] == 'settings_updated' ) {
+						$saved_errors[$index]['message'] .= ' ' . $msg;
+						break;
+					}
+				}
+
+				set_transient( 'settings_errors', $saved_errors );
+			}
+			else {
+				add_settings_error( 'general', 'connect_needed', $msg );
+			}
+		}
 	}
 
 	/**
