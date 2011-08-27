@@ -114,6 +114,7 @@ class DiasporaOptions extends PluginOptions {
 		}
 
 		add_action( 'post_submitbox_misc_actions', array( &$this, 'postMiscOptions' ) );
+		add_action( 'update_option', array( &$this, 'updateOption' ), 10, 3 );
 		add_filter( 'redirect_post_location', array( &$this, 'redirectPost' ), 10, 2 );
 
 		if  ( ( isset($_GET['auth-request']) ) || ( isset( $_GET['authorize'] ) ) ) {
@@ -273,6 +274,26 @@ class DiasporaOptions extends PluginOptions {
 		}
 
 		return $location;
+	}
+
+	/**
+	 * Clear the OAuth2 tokens if the Diaspora id (handle) has changed.
+	 *
+	 * @param string $option_name Admin option on the settings page
+	 * @param mixed $old_value Previous value
+	 * @param mixed $new_value Changed value
+	 */
+	public function updateOption($option_name, $old_value, $new_value) {
+		if ( $option_name == $this->options_name ) {
+			if ( isset($new_value['id']) 
+				&& ( isset($old_value['id']) )
+				&& ( strcasecmp($old_value['id'], $new_value['id']) !== 0 ) ) {
+
+				unset($new_value['oauth2_access_token']);
+				unset($new_value['oauth2_refresh_token']);
+				unset($new_value['oauth2_lifetime']);
+			}
+		}
 	}
 
 }
