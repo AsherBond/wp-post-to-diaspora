@@ -103,7 +103,6 @@ class FunctionalTest extends PHPUnit_Extensions_SeleniumTestCase {
 
 	/**
  	 * Tests that valid admin settings are successfully saved and stored.
-	 * @group current
 	 */
 	public function testValidSettings() {
 		$this->loginAndBrowseToSettings();
@@ -185,22 +184,34 @@ sleep(5);
 	}
 
 	/**
+	 * Tests an OAuth2 authorization and token request.
+	 */
+	public function testConnectDiaspora() {
+		$this->loginAndBrowseToSettings();
+
+		$this->enterValidSettings();
+
+		$this->clickAndWait( 'css=input[value="Save Changes"]' );
+		$this->assertElementPresent('css=a[href="?page=wp-post-to-diaspora&auth-request"]' );
+
+		$this->clickAndWait( 'css=a[href="?page=wp-post-to-diaspora&auth-request"]' );
+
+		$this->assertElementContainsText( 'css=div#flash_alert', 'You need to sign in or sign up before continuing.' );
+
+		$this->type( 'user[username]', $this->d_username );
+		$this->type( 'user[password]', $this->d_password );
+		$this->clickAndWait( 'user_submit' );
+
+		$this->assertTextPresent( 'Connection successful' );
+	}
+
+	/**
 	 * Tests sending a message to Diaspora.
 	 */
 	public function testAddPostAndPublishToDiaspora() {
 		$this->loginAndBrowseToSettings();
 
-		$this->type('id', $this->d_id);
-		$this->type('oauth2_identifier', $this->d_oauth2_identifier);
-		$this->type('oauth2_secret', $this->d_oauth2_secret);
-		$this->type('port', $this->d_port);
-
-		if ( ( $this->d_protocol == 'https' ) ) {
-			$this->check('protocol');
-		}
-		else if ( ( $this->d_protocol == 'http' ) ) {
-			$this->uncheck('protocol');
-		}
+		$this->enterValidSettings();
 
 		$this->clickAndWait( 'css=input[value="Save Changes"]' );
 		$this->assertElementContainsText( 'css=div#setting-error-settings_updated strong', 'Settings saved' );
@@ -222,6 +233,20 @@ sleep(5);
 		$this->clickAndWait( 'publish');
 		$this->assertElementPresent( 'wpbody-content div#message' );
 		$this->assertElementContainsText( 'wpbody-content div#message', 'Posted to Diaspora successfully' );
+	}
+
+	private function enterValidSettings() {
+		$this->type('id', $this->d_id);
+		$this->type('oauth2_identifier', $this->d_oauth2_identifier);
+		$this->type('oauth2_secret', $this->d_oauth2_secret);
+		$this->type('port', $this->d_port);
+
+		if ( ( $this->d_protocol == 'https' ) ) {
+			$this->check('protocol');
+		}
+		else if ( ( $this->d_protocol == 'http' ) ) {
+			$this->uncheck('protocol');
+		}
 	}
 
 }

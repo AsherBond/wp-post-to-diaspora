@@ -99,6 +99,7 @@ class Diaspora {
 			$this->logger->log( "Retrieving oauth2 tokens using redirect_uri of $redirect_uri." );
 
 			$token = $oauth->getAccessToken( $_GET['code'], $redirect_uri );
+			add_settings_error( 'general', 'settings_updated', 'Connection successful.', 'updated' );
 
 			$this->logger->log( "Token is " . print_r($token, true) );
 		}
