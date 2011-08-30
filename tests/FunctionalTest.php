@@ -16,8 +16,8 @@ require_once 'PHPUnit/Extensions/SeleniumTestCase.php';
 class FunctionalTest extends PHPUnit_Extensions_SeleniumTestCase {
 
 	private $d_id;
-	private $d_oauth2_identifier;
-	private $d_oauth2_secret;
+	private static $d_oauth2_identifier;
+	private static $d_oauth2_secret;
 	private $d_username;
 	private $d_password;
 	private $d_port;
@@ -42,8 +42,6 @@ class FunctionalTest extends PHPUnit_Extensions_SeleniumTestCase {
 					$this->wp_url          = (string) $site->url;
 					break;
 				case 'diaspora':
-					$this->d_oauth2_identifier = (string) $site->oauth2_identifier;
-					$this->d_oauth2_secret     = (string) $site->oauth2_secret;
 					$this->d_username          = (string) $site->username;
 					$this->d_password          = (string) $site->password;
 					$this->d_port              = (string) $site->port;
@@ -184,7 +182,62 @@ sleep(5);
 	}
 
 	/**
+	 * Preregisters a WordPress blog on Diaspora.
+	 * The user must be an admistrator of the Diaspora server
+	 * for this to work.
+	 */
+	public function testPreregisterApplication() {
+		$host = $this->d_url;
+
+		if ( !empty($this->d_port) ) {
+			$host = $this->d_url . ':' . $this->d_port;
+		}
+
+		$this->open( $host );
+
+		$this->clickAndWait( 'link=Log In' );
+
+		$this->loginDiaspora();
+
+		$this->click( 'css=ul#user_menu' );
+		$this->clickAndWait( 'link=admin' );
+
+		$this->retrieveOAuth2Credentials();
+
+		if ((empty(self::$d_oauth2_identifier)) || (empty(self::$d_oauth2_secret))) {
+			$this->type('o_auth2_provider_models_active_record_client_name', 'blog');
+			$this->type('o_auth2_provider_models_active_record_client_description', 'My Blog');
+			$this->type('o_auth2_provider_models_active_record_client_application_base_url', $this->wp_url);
+
+			$this->clickAndWait('o_auth2_provider_models_active_record_client_submit');
+
+			$this->retrieveOAuth2Credentials();
+		}
+
+		$this->assertNotEmpty(self::$d_oauth2_identifier);
+		$this->assertNotEmpty(self::$d_oauth2_secret);
+	}
+
+	/**
+	 * Retrieves the OAuth2 credentials from the current page.
+	 * Assumes that user is at the admin page.
+	 */
+	private function retrieveOAuth2Credentials() {
+		$html_body = $this->getText('css=body');
+		preg_match('/oauth_identifier: "([A-z0-9]*)"/', $html_body, $matches);
+		if (count($matches) == 2) {
+			self::$d_oauth2_identifier = $matches[1];
+		}
+		preg_match('/oauth_secret: "([A-z0-9]*)"/', $html_body, $matches);
+		if (count($matches) == 2) {
+			self::$d_oauth2_secret = $matches[1];
+		}
+	}
+
+	/**
 	 * Tests an OAuth2 authorization and token request.
+	 *
+	 * @depends testPreregisterApplication
 	 */
 	public function testConnectDiaspora() {
 		$this->loginAndBrowseToSettings();
@@ -192,15 +245,15 @@ sleep(5);
 		$this->enterValidSettings();
 
 		$this->clickAndWait( 'css=input[value="Save Changes"]' );
-		$this->assertElementPresent('css=a[href="?page=wp-post-to-diaspora&auth-request"]' );
 
-		$this->clickAndWait( 'css=a[href="?page=wp-post-to-diaspora&auth-request"]' );
+		$this->assertElementPresent( "xpath=//a[contains(@href,'/oauth/authorize')]" );
+
+		$this->clickAndWait( "xpath=//a[contains(@href,'/oauth/authorize')]" );
 
 		$this->assertElementContainsText( 'css=div#flash_alert', 'You need to sign in or sign up before continuing.' );
 
-		$this->type( 'user[username]', $this->d_username );
-		$this->type( 'user[password]', $this->d_password );
-		$this->clickAndWait( 'user_submit' );
+		$this->loginDiaspora();
+		$this->clickAndWait( 'css=input[value="Authorize"]' );
 
 		$this->assertTextPresent( 'Connection successful' );
 	}
@@ -237,8 +290,8 @@ sleep(5);
 
 	private function enterValidSettings() {
 		$this->type('id', $this->d_id);
-		$this->type('oauth2_identifier', $this->d_oauth2_identifier);
-		$this->type('oauth2_secret', $this->d_oauth2_secret);
+		$this->type('oauth2_identifier', self::$d_oauth2_identifier);
+		$this->type('oauth2_secret', self::$d_oauth2_secret);
 		$this->type('port', $this->d_port);
 
 		if ( ( $this->d_protocol == 'https' ) ) {
@@ -247,6 +300,12 @@ sleep(5);
 		else if ( ( $this->d_protocol == 'http' ) ) {
 			$this->uncheck('protocol');
 		}
+	}
+
+	private function loginDiaspora() {
+		$this->type( 'user[username]', $this->d_username );
+		$this->type( 'user[password]', $this->d_password );
+		$this->clickAndWait( 'user_submit' );
 	}
 
 }

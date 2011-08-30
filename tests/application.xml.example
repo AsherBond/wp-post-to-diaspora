@@ -12,8 +12,6 @@
 			<username>a_username</username>
 			<password>a_password</password>
 			<port>3000</port>
-			<oauth2_identifier>registered_id</oauth2_identifier>
-			<oauth2_secret>registered_secret</oauth2_secret>
 		</site>
 	</sites>
 </application>

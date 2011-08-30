@@ -113,24 +113,18 @@ class Diaspora {
 	/**
 	 * Make an OAuth2 authorization grant to the Diaspora server.
 	 */
-	public function authorizationRequest() {
+	public function getAuthorizationURI() {
 		$host = $this->getHost();
 
-		if ( $this->isActiveUrl( $host ) ) {
-			$credentials = array('key'    => $this->oauth2_identifier,
-								 'secret' => $this->oauth2_secret);
+		$credentials = array('key'    => $this->oauth2_identifier,
+		                     'secret' => $this->oauth2_secret);
 
-			$app   = new DiasporaApplication( 'WP Post To Diaspora', $host, $credentials );
-			$oauth = new DiasporaOauth( $app );
+		$app   = new DiasporaApplication( 'WP Post To Diaspora', $host, $credentials );
+		$oauth = new DiasporaOauth( $app );
 
-			$oauth->_scope = 'limited';
+		$oauth->_scope = 'limited';
 
-			$this->logger->log( "Sending oauth2 request." );
-			$oauth->authorize();
-		}
-		else {
-			add_settings_error( 'id', 'id', 'Could not establish a connection to ' . $host . '.' );	
-		}
+		return $oauth->getAuthorizationURI();
 	}
 
 	/**
@@ -203,27 +197,6 @@ class Diaspora {
 		}
 
 		return $host;
-	}
-
-	/**
-	 * Determines if a connect can be established for a given URL.
-	 * @param string $url The URL to connect to.
-	 * @return bool True if a connect is made, false if not.
-	 */
-	private function isActiveUrl( $url ) {
-		$ch        = curl_init();
-		$is_active = true;
-
-		if ( $ch !== false ) {
-			curl_setopt($ch, CURLOPT_URL, $url);
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
-			$is_active = curl_exec( $ch );
-
-			curl_close( $ch );
-		}
-
-		return $is_active;
 	}
 
 	public function setId( $id ) {

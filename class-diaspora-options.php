@@ -154,6 +154,7 @@ class DiasporaOptions extends PluginOptions {
 	}
 
 	public function renderConnectLink() {
+		$msg = '';
 		$options = get_option( $this->options_name );
 
 		if ( ( !empty($options['id'] ) )
@@ -163,29 +164,42 @@ class DiasporaOptions extends PluginOptions {
 			&& ( isset( $_GET['page'] ) )
 			&& ( $_GET['page'] == $this->uid ) ) {
 
-			$msg = 'Connect with your Diaspora server by clicking <a href="?page=' . $this->uid . '&auth-request">here</a>.';
+			$diaspora = new Diaspora();
+			$diaspora->setId( $options['id'] );
+			$diaspora->setOauth2Identifier( $options['oauth2_identifier'] );
+			$diaspora->setOauth2Secret( $options['oauth2_secret'] );
+			$diaspora->setPort( $options['port'] );
+			$diaspora->setProtocol( $options['protocol'] );
+
+			$uri = $diaspora->getAuthorizationURI();
+
+			if ( !empty($uri) ) {
+				$msg = 'Connect to your Diaspora server by clicking <a href="' . $uri . '">here</a>.';
+			}
 
 			if ( isset($_GET['error'] ) ) {
 				$msg .= ' Error: ' . $_GET['error'];
 			}
 
-			$saved_errors = get_transient( 'settings_errors' );
+			if ( !empty($msg) ) {
+				$saved_errors = get_transient( 'settings_errors' );
 
-			if ( ( !empty($saved_errors) ) && ( is_array($saved_errors) ) ) {
+				if ( ( !empty($saved_errors) ) && ( is_array($saved_errors) ) ) {
 
-				// Locate the 'Settings saved.' message that appears during a postback call and append
-				// the connect message to it.
-				foreach ( $saved_errors as $index=> $saved_error ) {
-					if ( $saved_error['code'] == 'settings_updated' ) {
-						$saved_errors[$index]['message'] .= ' ' . $msg;
-						break;
+					// Locate the 'Settings saved.' message that appears during a postback call and append
+					// the connect message to it.
+					foreach ( $saved_errors as $index=> $saved_error ) {
+						if ( $saved_error['code'] == 'settings_updated' ) {
+							$saved_errors[$index]['message'] .= ' ' . $msg;
+							break;
+						}
 					}
-				}
 
-				set_transient( 'settings_errors', $saved_errors );
-			}
-			else {
-				add_settings_error( 'general', 'connect_needed', $msg );
+					set_transient( 'settings_errors', $saved_errors );
+				}
+				else {
+					add_settings_error( 'general', 'connect_needed', $msg );
+				}
 			}
 		}
 	}
