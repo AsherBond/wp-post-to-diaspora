@@ -27,32 +27,6 @@
 		delete_option ('wp_post_to_diaspora_options');
 	}
 
-	function wp_post_to_diaspora_process_content($content) {
-		$options = get_option ( 'wp_post_to_diaspora_options' );
-		$urlShortener    = new UrlShortener();
-		$urlShortener->setServiceName( $options['url_shortener'] );
-
-		$pattern = '/(?#Protocol)(?:(?:ht|f)tp(?:s?)\:\/\/|~\/|\/)?(?#Username:Password)(?:\w+:\w+@)?(?#Subdomains)(?:(?:[-\w]+\.)+(?#TopLevel Domains)(?:com|org|net|gov|mil|biz|info|mobi|name|aero|jobs|museum|travel|[a-z]{2}))(?#Port)(?::[\d]{1,5})?(?#Directories)(?:(?:(?:\/(?:[-\w~!$+|.,=]|%[a-f\d]{2})+)+|\/)+|\?|#)?(?#Query)(?:(?:\?(?:[-\w~!$+|.,*:]|%[a-f\d{2}])+=?(?:[-\w~!$+|.,*:=]|%[a-f\d]{2})*)(?:&(?:[-\w~!$+|.,*:]|%[a-f\d{2}])+=?(?:[-\w~!$+|.,*:=]|%[a-f\d]{2})*)*)*(?#Anchor)(?:#(?:[-\w~!$+|.,*:=]|%[a-f\d]{2})*)?/';
-		preg_match_all($pattern, $content, $matches);
-
-		if ((isset($matches[0])) && (is_array($matches[0]))) {
-			foreach ($matches[0] as $match) {
-				$shortened_url = $urlShortener->shorten($match);
-				if ($shortened_url !== false) {
-					$content = str_replace($match, $urlShortener->shorten($match), $content);
-				}
-			}
-		}
-
-		return $content;
-	}
-	
-	function wp_post_to_diaspora_process_content_to_string () {
-		echo wp_post_to_diaspora_process_content($_POST['content']);
-
-		die();
-	}
-
 	function wp_post_to_diaspora_post_to_diaspora ($postID) {
 
 		if (( isset( $_POST['wp_post_to_diaspora_options_share_with']['diaspora'] ) ) 
@@ -89,6 +63,5 @@
 	register_activation_hook(__FILE__, 'wp_post_to_diaspora_install');
 	register_deactivation_hook(__FILE__, 'wp_post_to_diaspora_remove');
 	add_action('publish_post', 'wp_post_to_diaspora_post_to_diaspora');
-	add_action('wp_ajax_js_shrink_urls', 'wp_post_to_diaspora_process_content_to_string');
 
 ?>
