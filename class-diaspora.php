@@ -1,6 +1,7 @@
 <?php
 
 require_once 'class-logger.php';
+require_once 'class-url-shortener.php';
 require_once 'libraries/libdiaspora-php/load.php';
 
 /**
@@ -64,6 +65,8 @@ class Diaspora {
 	 * @var string
 	 */
 	private $transient_name_prefix = 'wp_post_to_diaspora';
+
+	private $urlShortener;
 
 	function __construct() {
 		$this->protocol = self::HTTPS;
@@ -131,12 +134,15 @@ class Diaspora {
 	 * @todo Append shortened link to $blog->displayName 
 	 */
 	private function createActivity() {
-		$author_avatar    = null;
-		$matches          = array();
-		$post             = get_post( $this->post_id );
-		$post_date_ts     = strtotime( $post->post_date );
-		$permalink        = get_permalink( $this->post_id );
-		$activity_blog_id = 'tag:' . preg_replace( '/(http|https):\/\//i', '', get_home_url() )
+		$author_avatar     = null;
+		$matches           = array();
+		$post              = get_post( $this->post_id );
+		$post_date_ts      = strtotime( $post->post_date );
+		$permalink         = get_permalink( $this->post_id );
+		$shortened_url     = $permalink;
+
+		$blog_display_name = $post->post_title;
+		$activity_blog_id  = 'tag:' . preg_replace( '/(http|https):\/\//i', '', get_home_url() )
 		                    . ',' . date( 'Y', $post_date_ts );
 
 		$avatar_img_html = get_avatar( get_the_author_meta('user_email'), self::WP_AVATAR_SIZE );
@@ -145,6 +151,14 @@ class Diaspora {
 		preg_match( "/src='([^']+)'/", $avatar_img_html, $matches );
 		if ( isset( $matches[1] ) ) {
 			$avatar_img_url = $matches[1];
+		}
+
+		if ( isset($this->urlShortener) ) {
+			$shortened_url = $this->urlShortener->shorten( $permalink );
+
+			if ( !empty($shortened_url) ) {
+				$blog_display_name .= ' - ' . $shortened_url;
+			}
 		}
 
 		$activity = new DiasporaStreams_Activity(array(
@@ -168,7 +182,7 @@ class Diaspora {
 
 		$blog = new DiasporaStreams_ActivityObject(array(
 			'content'     => $post->post_content,
-			'displayName' => $post->post_title,
+			'displayName' => $blog_display_name,
 			'id'          => $activity_blog_id . ':' . $permalink,
 			'objectType'  => 'article',
 			'url'         => $permalink
@@ -247,6 +261,10 @@ class Diaspora {
 		}
 	}
 
+	public function setUrlShortener( UrlShortener $urlShortener ) {
+		$this->urlShortener = $urlShortener;
+	}
+
 	/**
 	 * Sends a WordPress post to a Diaspora server.
 	 */
@@ -289,7 +307,7 @@ class Diaspora {
 
 					$result = curl_exec($ch);
 
-					$this->logger->log( "Posting to URL: $host" );
+					$this->logger->log( "Posting to URL: $activity_url" );
 					$this->logger->log( "Sending activity: $json_string" );
 
 					if ($result !== false) {

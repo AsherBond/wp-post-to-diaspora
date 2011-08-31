@@ -1,6 +1,6 @@
 <?php
 
-require 'class-diaspora.php';
+require_once 'class-diaspora.php';
 
 class DiasporaTest extends PHPUnit_Framework_TestCase {
 

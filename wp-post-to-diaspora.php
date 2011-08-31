@@ -30,16 +30,16 @@
 	function wp_post_to_diaspora_process_content($content) {
 		$options = get_option ( 'wp_post_to_diaspora_options' );
 		$urlShortener    = new UrlShortener();
+		$urlShortener->setServiceName( $options['url_shortener'] );
 
-		$url_shortener  = $options['url_shortener'];
 		$pattern = '/(?#Protocol)(?:(?:ht|f)tp(?:s?)\:\/\/|~\/|\/)?(?#Username:Password)(?:\w+:\w+@)?(?#Subdomains)(?:(?:[-\w]+\.)+(?#TopLevel Domains)(?:com|org|net|gov|mil|biz|info|mobi|name|aero|jobs|museum|travel|[a-z]{2}))(?#Port)(?::[\d]{1,5})?(?#Directories)(?:(?:(?:\/(?:[-\w~!$+|.,=]|%[a-f\d]{2})+)+|\/)+|\?|#)?(?#Query)(?:(?:\?(?:[-\w~!$+|.,*:]|%[a-f\d{2}])+=?(?:[-\w~!$+|.,*:=]|%[a-f\d]{2})*)(?:&(?:[-\w~!$+|.,*:]|%[a-f\d{2}])+=?(?:[-\w~!$+|.,*:=]|%[a-f\d]{2})*)*)*(?#Anchor)(?:#(?:[-\w~!$+|.,*:=]|%[a-f\d]{2})*)?/';
 		preg_match_all($pattern, $content, $matches);
 
 		if ((isset($matches[0])) && (is_array($matches[0]))) {
 			foreach ($matches[0] as $match) {
-				$shortened_url = $urlShortener->shorten($url_shortener, $match);
+				$shortened_url = $urlShortener->shorten($match);
 				if ($shortened_url !== false) {
-					$content = str_replace($match, $urlShortener->shorten($url_shortener, $match), $content);
+					$content = str_replace($match, $urlShortener->shorten($match), $content);
 				}
 			}
 		}
@@ -60,31 +60,22 @@
 
 			if (!wp_is_post_revision($postID)) {
 				$options = get_option ( 'wp_post_to_diaspora_options' );
-				//$urlShortener    = new UrlShortener();
 
 				$id                  = $options['id'];
 				$oauth2_access_token = $options['oauth2_access_token'];
-				$port                = $options['port'];
-				$protocol            = $options['protocol'];
-				//$url_shortener = $options['url_shortener'];
-
-				//$shortened_url = $urlShortener->shorten( $url_shortener, $permalink );
-
-				//if ($shortened_url !== false) {
-				//	$content = sprintf($str, $post->post_title, $shortened_url);
-				//}
-				//else {
-				//	$content = sprintf($str, $post->post_title, $permalink);
-				//}
 
 				if ((!empty($id))  && (!empty($oauth2_access_token))) {
+					$urlShortener    = new UrlShortener();
+					$urlShortener->setServiceName( $options['url_shortener'] );
+
 					$diaspora = new Diaspora();
 
 					$diaspora->setId( $id );
 					$diaspora->setOauth2AccessToken( $oauth2_access_token );
-					$diaspora->setProtocol( $protocol );
-					$diaspora->setPort( $port );
+					$diaspora->setPort( $options['port'] );
+					$diaspora->setProtocol( $options['protocol'] );
 					$diaspora->setPostId( $postID );
+					$diaspora->setUrlShortener( $urlShortener );
 
 					$diaspora->postToDiaspora();
 				} else {

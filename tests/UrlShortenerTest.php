@@ -1,6 +1,6 @@
 <?php
 
-require 'class-url-shortener.php';
+require_once 'class-url-shortener.php';
 
 class UrlShortenerTest extends PHPUnit_Framework_TestCase {
 
@@ -14,11 +14,17 @@ class UrlShortenerTest extends PHPUnit_Framework_TestCase {
 		$urlShortener = new UrlShortener();
 		$url = 'http://joindiaspora.com';
 
-		$this->assertEquals('http://goo.gl/C7pJ', $urlShortener->shorten('goo.gl', $url));
-		$this->assertEquals('http://is.gd/NVVvCS', $urlShortener->shorten('is.gd', $url));
-		$this->assertEquals('http://tinyurl.com/34n8w73', $urlShortener->shorten('tinyurl.com', $url));
+		$urlShortener->setServiceName('goo.gl');
+		$this->assertEquals('http://goo.gl/4mhy', $urlShortener->shorten($url));
 
-		$this->assertEquals('http://tinyurl.com/34n8w73', $urlShortener->shorten('UNSUPPORTED_SHORTENER', $url));
+		$urlShortener->setServiceName('is.gd');
+		$this->assertEquals('http://is.gd/NVVvCS', $urlShortener->shorten($url));
+
+		$urlShortener->setServiceName('tinyurl.com');
+		$this->assertEquals('http://tinyurl.com/34n8w73', $urlShortener->shorten($url));
+
+		$urlShortener->setServiceName('UNSUPPORTED_SHORTENER');
+		$this->assertEquals('http://tinyurl.com/34n8w73', $urlShortener->shorten($url));
 	}
 
 }

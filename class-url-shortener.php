@@ -12,8 +12,14 @@ class UrlShortener {
 	 */
 	private $timeout = 10;
 
+	private $service_name;
+
 	function __construct() {
 
+	}
+
+	public function setServiceName( $service_name ) {
+		$this->service_name = $service_name;
 	}
 
 	public function setTimeout( $timeout ) {
@@ -24,12 +30,11 @@ class UrlShortener {
 	/**
 	 * Shortens the length of a web address.
 	 *
-	 * @param string $service_name		The web service to use
 	 * @param string $url			The web address to shorten
 	 * @return string|bool			The shortened web address.  False on failure.
 	 */
-	public function shorten( $service_name, $url ) {
-		switch ( $service_name ) {
+	public function shorten( $url ) {
+		switch ( $this->service_name ) {
 			case 'goo.gl':
 				$json_response = $this->sendHttpPostRequest( 'https://www.googleapis.com/urlshortener/v1/url',
 									     $url, '{"longUrl": "' . $url . '"}' );
