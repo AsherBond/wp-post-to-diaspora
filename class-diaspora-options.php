@@ -31,9 +31,18 @@ class DiasporaOptions extends PluginOptions {
 	public function initialize() {
 		parent::initialize();
 
+		if ( !file_exists(dirname(__FILE__) . '/libraries/libdiaspora-php/load.php')) {
+			add_settings_error( 'general', 'connect_needed',
+				 'Download <a href="https://github.com/untitaker/libdiaspora-php/zipball/master">libdiaspora-php</a> and extract to '
+				 . dirname(__FILE__) . '/libraries.  Rename the unitaker-lib-diaspora-php directory to libdiaspora-php.' );
+
+			return;
+		}
+
 		register_setting( $this->options_name, $this->options_name, array( &$this, 'validate' ) );
 
 		add_settings_section( 'diaspora_general', 'General', array( $this, 'renderSectionText' ), 'general' );
+
 
 		$this->field_args_by_id['id'] = array(
 			'label'         => 'Diaspora ID',
@@ -118,7 +127,7 @@ class DiasporaOptions extends PluginOptions {
 		add_action( 'update_option', array( &$this, 'updateOption' ), 10, 3 );
 		add_filter( 'redirect_post_location', array( &$this, 'redirectPost' ), 10, 2 );
 
-		if  ( ( isset($_GET['auth-request']) ) || ( isset( $_GET['authorize'] ) ) ) {
+		if  ( isset($_GET['authorize']) ) {
 			$this->connectToDiaspora();
 		}
 	}

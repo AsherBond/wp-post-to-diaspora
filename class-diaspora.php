@@ -2,7 +2,11 @@
 
 require_once 'class-logger.php';
 require_once 'class-url-shortener.php';
-require_once 'libraries/libdiaspora-php/load.php';
+
+if ( file_exists(dirname(__FILE__) . '/libraries/libdiaspora-php/load.php') ) {
+	require_once 'libraries/libdiaspora-php/load.php';
+}
+
 
 /**
  * Transmits a message from Wordpress to Diaspora.
