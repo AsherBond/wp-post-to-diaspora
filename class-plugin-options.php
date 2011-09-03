@@ -5,7 +5,7 @@
  */
 class PluginOptions {
 
-	private $default_field_args;
+	protected $default_field_args;
 
 	/**
 	 * Field arguments keyed by a field identifier.  These arguments determine

@@ -114,7 +114,7 @@ class DiasporaOptions extends PluginOptions {
 
 		if ( is_array( $this->field_args_by_id ) ) {
 			foreach ( $this->field_args_by_id as $id => $field_args ) {
-				$field_args = wp_parse_args( $field_args, $default_field_args );
+				$field_args = wp_parse_args( $field_args, $this->default_field_args );
 
 				$field_args['id'] = $id;
 

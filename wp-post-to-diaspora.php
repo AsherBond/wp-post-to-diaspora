@@ -17,7 +17,9 @@
 	require_once dirname (__FILE__) . '/class-url-shortener.php';
 
 	$diaspora        = new Diaspora();
-	$diasporaOptions = new DiasporaOptions();
+	if ( is_admin() === true ) {
+		$diasporaOptions = new DiasporaOptions();
+	}
 	
 	function wp_post_to_diaspora_install () {
 		add_option ('wp_post_to_diaspora_options', '');
