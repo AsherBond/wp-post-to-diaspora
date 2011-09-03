@@ -288,7 +288,7 @@ class Diaspora {
 			else {
 				$json_string = $this->activity->encode();
 
-				$activity_url  = $this->getHost() . '/activity_streams/notes.json';
+				$activity_url  = $this->getHost() . '/activity_streams/note';
 
 				$resultArray = null;
 
