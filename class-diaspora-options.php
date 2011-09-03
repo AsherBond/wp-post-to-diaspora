@@ -41,7 +41,7 @@ class DiasporaOptions extends PluginOptions {
 
 		register_setting( $this->options_name, $this->options_name, array( &$this, 'validate' ) );
 
-		add_settings_section( 'diaspora_general', 'General', array( $this, 'renderSectionText' ), 'general' );
+		add_settings_section( 'diaspora_general', 'General', array( $this, 'renderSectionText' ), 'diaspora_options' );
 
 
 		$this->field_args_by_id['id'] = array(
@@ -118,7 +118,7 @@ class DiasporaOptions extends PluginOptions {
 
 				$field_args['id'] = $id;
 
-				add_settings_field( $id, $field_args['label'], $this->render_field_method, 'general', 'diaspora_general', $field_args );
+				add_settings_field( $id, $field_args['label'], $this->render_field_method, 'diaspora_options', 'diaspora_general', $field_args );
 			}
 		}
 
@@ -290,7 +290,7 @@ class DiasporaOptions extends PluginOptions {
 		echo '	<form method="post" action="options.php">';
 
 		settings_fields( 'wp_post_to_diaspora_options' );
-		do_settings_sections( 'general' );
+		do_settings_sections( 'diaspora_options' );
 
 		echo '		<p class="submit"><input type="submit" name="update" value="' . __('Save Changes') . '" /></p>';
 		echo '	</form>';
